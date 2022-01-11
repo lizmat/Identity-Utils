@@ -1,0 +1,16 @@
+use Test;
+use Identity::Utils;
+
+plan 7;
+
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+
+is short-name($identity),     'Foo::Bar',   'is short-name ok?';
+is ver($identity),            '0.0.42',     'is ver ok?';
+is-deeply version($identity), v0.0.42,      'is version ok?';
+is auth($identity),           'zef:lizmat', 'is auth ok?';
+is ecosystem($identity),      'zef',        'is ecosystem ok?';
+is nick($identity),           'lizmat',     'is nick ok?';
+is api($identity),            '2.0',        'is api ok?';
+
+# vim: expandtab shiftwidth=4
