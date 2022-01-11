@@ -41,7 +41,6 @@ api
 
 ```raku
 my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-
 say api($identity); # 2.0
 ```
 
@@ -52,7 +51,6 @@ auth
 
 ```raku
 my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-
 say auth($identity); # zef:lizmat
 ```
 
@@ -63,7 +61,6 @@ ecosystem
 
 ```raku
 my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-
 say ecosystem($identity); # zef
 ```
 
@@ -74,7 +71,6 @@ nick
 
 ```raku
 my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-
 say nick($identity); # lizmat
 ```
 
@@ -85,7 +81,6 @@ short-name
 
 ```raku
 my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-
 say short-name($identity);  # Foo::Bar
 ```
 
@@ -96,7 +91,6 @@ ver
 
 ```raku
 my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-
 say ver($identity);  # 0.0.42
 ```
 
@@ -106,10 +100,7 @@ version
 -------
 
 ```raku
-use Identity::Utils;
-
 my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-
 say version($identity);  # v0.0.42
 ```
 

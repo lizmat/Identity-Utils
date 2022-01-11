@@ -75,7 +75,6 @@ optional C<api:<1>> field.
 =begin code :lang<raku>
 
 my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-
 say api($identity); # 2.0
 
 =end code
@@ -88,7 +87,6 @@ could be found.
 =begin code :lang<raku>
 
 my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-
 say auth($identity); # zef:lizmat
 
 =end code
@@ -101,7 +99,6 @@ could be found.
 =begin code :lang<raku>
 
 my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-
 say ecosystem($identity); # zef
 
 =end code
@@ -114,7 +111,6 @@ C<Nil> if no C<auth> field could be found.
 =begin code :lang<raku>
 
 my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-
 say nick($identity); # lizmat
 
 =end code
@@ -127,7 +123,6 @@ C<Nil> if no C<auth> field could be found.
 =begin code :lang<raku>
 
 my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-
 say short-name($identity);  # Foo::Bar
 
 =end code
@@ -140,7 +135,6 @@ if no C<ver>, C<auth> or C<api> fields could be found.
 =begin code :lang<raku>
 
 my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-
 say ver($identity);  # 0.0.42
 
 =end code
@@ -152,10 +146,7 @@ C<ver> field could be found.
 
 =begin code :lang<raku>
 
-use Identity::Utils;
-
 my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-
 say version($identity);  # v0.0.42
 
 =end code
