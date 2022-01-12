@@ -109,7 +109,7 @@ say without-api($identity);   # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>
 
 say sanitize($identity);      # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>
 
-say build("Foo::Bar", :ver<0.0.42);  # Foo::Bar:ver<0.0.42>
+say build("Foo::Bar", :ver<0.0.42>);  # Foo::Bar:ver<0.0.42>
 
 =end code
 
