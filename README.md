@@ -43,6 +43,8 @@ DESCRIPTION
 
 Identity::Utils provides some utility functions for inspecting various aspects of distribution identity strings. They assume any given string is a well-formed identity in the form `name:ver<0.0.1>:auth<eco:nick>` with an optional `api:<1>` field.
 
+A general note with regards to `api`: if it consists of `"0"`, then it is assumed there is **no** api field specified.
+
 SUBROUTINES
 ===========
 

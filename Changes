@@ -2,6 +2,9 @@ Revision history for Identity-Utils
 
 {{$NEXT}}
 
+0.0.4  2022-01-12T13:35:03+01:00
+    - Make sure an api of "0" means NO api
+
 0.0.3  2022-01-12T12:58:22+01:00
     - Up dependency on String::Utils in META
 

@@ -21,14 +21,14 @@ my sub build(str $short-name,
   :$ver, :$auth, :$api, :$ecosystem = "zef", :$nick
 ) is export {
     my str @parts = $short-name;
-    @parts.push("ver<$_>")  with $ver;
-    with $auth {
-        @parts.push("auth<$_>");
+    @parts.push("ver<$ver>") if $ver;
+    if $auth {
+        @parts.push("auth<$auth>");
     }
     orwith $nick {
         @parts.push("auth<$ecosystem:$nick>");
     }
-    @parts.push("api<$_>")  with $api;
+    @parts.push("api<$api>") if $api && $api ne "0";
     @parts.join(":")
 }
 
@@ -59,7 +59,12 @@ my sub nick(str $identity) is export {
 }
 
 my sub api(str $identity) is export {
-    between $identity, ':api<', '>'
+    if between($identity, ':api<', '>') -> $api {
+        $api eq "0" ?? Nil !! $api
+    }
+    else {
+        Nil
+    }
 }
 my sub without-api(str $identity) is export {
     around $identity, ':api<', '>'
@@ -69,7 +74,9 @@ my sub sanitize(str $identity) is export {
     my str @parts = short-name($identity);
     @parts.push("ver<$_>")  with ver($identity);
     @parts.push("auth<$_>") with auth($identity);
-    @parts.push("api<$_>")  with api($identity);
+    if api($identity) -> $api {
+        @parts.push("api<$api>") if $api ne "0";
+    }
     @parts.join(":")
 }
 
@@ -119,6 +126,9 @@ Identity::Utils provides some utility functions for inspecting various aspects
 of distribution identity strings.  They assume any given string is a
 well-formed identity in the form C<name:ver<0.0.1>:auth<eco:nick>> with an
 optional C<api:<1>> field.
+
+A general note with regards to C<api>: if it consists of C<"0">, then it is
+assumed there is B<no> api field specified.
 
 =head1 SUBROUTINES
 
