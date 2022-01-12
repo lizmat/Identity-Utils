@@ -1,14 +1,42 @@
-use String::Utils:ver<0.0.2>:auth<zef:lizmat>;
+use String::Utils:ver<0.0.3>:auth<zef:lizmat>;
 
 my sub short-name(str $identity) is export {
-    (before $identity, ':ver<')
-      // (before $identity, ':auth<')
-      // (before $identity, ':api<')
-      // $identity
+    with $identity.rindex('::') -> int $offset {
+        with $identity.index(':', $offset + 2) -> int $chars {
+            $identity.substr(0, $chars)
+        }
+        else {
+            $identity
+        }
+    }
+    orwith $identity.index(':') -> int $chars {
+        $identity.substr(0, $chars)
+    }
+    else {
+        $identity
+    }
+}
+
+my sub build(str $short-name,
+  :$ver, :$auth, :$api, :$ecosystem = "zef", :$nick
+) is export {
+    my str @parts = $short-name;
+    @parts.push("ver<$_>")  with $ver;
+    with $auth {
+        @parts.push("auth<$_>");
+    }
+    orwith $nick {
+        @parts.push("auth<$ecosystem:$nick>");
+    }
+    @parts.push("api<$_>")  with $api;
+    @parts.join(":")
 }
 
 my sub ver(str $identity) is export {
     between $identity, ':ver<', '>'
+}
+my sub without-ver(str $identity) is export {
+    around $identity, ':ver<', '>'
 }
 
 my sub version(str $identity) is export {
@@ -17,6 +45,9 @@ my sub version(str $identity) is export {
 
 my sub auth(str $identity) is export {
     between $identity, ':auth<', '>'
+}
+my sub without-auth(str $identity) is export {
+    around $identity, ':auth<', '>'
 }
 
 my sub ecosystem(str $identity) is export {
@@ -29,6 +60,17 @@ my sub nick(str $identity) is export {
 
 my sub api(str $identity) is export {
     between $identity, ':api<', '>'
+}
+my sub without-api(str $identity) is export {
+    around $identity, ':api<', '>'
+}
+
+my sub sanitize(str $identity) is export {
+    my str @parts = short-name($identity);
+    @parts.push("ver<$_>")  with ver($identity);
+    @parts.push("auth<$_>") with auth($identity);
+    @parts.push("api<$_>")  with api($identity);
+    @parts.join(":")
 }
 
 =begin pod
@@ -45,19 +87,29 @@ use Identity::Utils;
 
 my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
 
-say short-name($identity);  # Foo::Bar
+say short-name($identity);    # Foo::Bar
 
-say ver($identity);         # 0.0.42
+say ver($identity);           # 0.0.42
 
-say version($identity);     # v0.0.42
+say without-ver($identity);   # Foo::Bar:auth<zef:lizmat>:api<2.0>
 
-say auth($identity);        # zef:lizmat
+say version($identity);       # v0.0.42
 
-say ecosystem($identity);   # zef
+say auth($identity);          # zef:lizmat
 
-say nick($identity);        # lizmat
+say without-auth($identity);  # Foo::Bar:ver<0.0.42>:api<2.0>
 
-say api($identity);         # 2.0
+say ecosystem($identity);     # zef
+
+say nick($identity);          # lizmat
+
+say api($identity);           # 2.0
+
+say without-api($identity);   # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>
+
+say sanitize($identity);      # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>
+
+say build("Foo::Bar", :ver<0.0.42);  # Foo::Bar:ver<0.0.42>
 
 =end code
 
@@ -94,6 +146,30 @@ say auth($identity); # zef:lizmat
 Returns the C<auth> field of the given identity, or C<Nil> if no C<auth> field
 could be found.
 
+=head2 build
+
+=begin code :lang<raku>
+
+my $ver  = "0.0.42";
+my $auth = "zef:lizmat";
+my $api  = "2.0";
+say build("Foo::Bar", :$ver, :$auth, :$api);
+  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>
+
+say build("Foo::Bar", :$ver, :nick<lizmat>);
+  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>
+
+=end code
+
+Builds an identity string from the given short name and optional named
+arguments:
+
+=item ver  - the "ver" value to be used
+=item auth - the "auth" value to be used, overrides "ecosystem" and "nick"
+=item api  - the "api" value to be used
+=item ecosystem - the ecosystem part of "auth", defaults to "zef"
+=item nick - the nick part of "auth", unless overridden by "auth"
+
 =head2 ecosystem
 
 =begin code :lang<raku>
@@ -117,6 +193,18 @@ say nick($identity); # lizmat
 
 Returns the nickname part of the C<auth> field of the given identity, or
 C<Nil> if no C<auth> field could be found.
+
+=head2 sanitize
+
+=begin code :lang<raku>
+
+my $identity = "Foo::Bar:auth<zef:lizmat>:ver<0.0.42>:api<2.0>";
+say sanitize($identity);  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>
+
+=end code
+
+Returns a version of the given identity in which any C<ver>, C<auth> and
+C<api> fields are put in the correct order.
 
 =head2 short-name
 
@@ -153,6 +241,39 @@ say version($identity);  # v0.0.42
 
 Returns the C<ver> field of the given identity as a C<Version> object, or
 C<Nil> if no C<ver> field could be found.
+
+=head2 without-api
+
+=begin code :lang<raku>
+
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+say without-api($identity);  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>
+
+=end code
+
+Returns the identity B<without> any C<api> field of the given identity
+
+=head2 without-auth
+
+=begin code :lang<raku>
+
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+say without-auth($identity);  # Foo::Bar:ver<0.0.42>:api<2.0>
+
+=end code
+
+Returns the identity B<without> any C<auth> field of the given identity
+
+=head2 without-ver
+
+=begin code :lang<raku>
+
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+say without-ver($identity);  # Foo::Bar:auth<zef:lizmat>:api<2.0>
+
+=end code
+
+Returns the identity B<without> any C<ver> field of the given identity
 
 =head1 AUTHOR
 

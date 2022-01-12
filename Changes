@@ -2,5 +2,11 @@ Revision history for Identity-Utils
 
 {{$NEXT}}
 
+0.0.2  2022-01-12T12:54:39+01:00
+    - Up dependency on String::Utils
+    - Fix problem with "short-name"
+    - Add "without-api", "without-auth", "without-ver"
+    - Add "sanitize" and "build"
+
 0.0.1  2022-01-11T12:40:20+01:00
     - Initial version
