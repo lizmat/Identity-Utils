@@ -13,29 +13,32 @@ use Identity::Utils;
 
 my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
 
-say short-name($identity);    # Foo::Bar
+say short-name($identity);      # Foo::Bar
 
-say ver($identity);           # 0.0.42
+say ver($identity);             # 0.0.42
 
-say without-ver($identity);   # Foo::Bar:auth<zef:lizmat>:api<2.0>
+say without-ver($identity);     # Foo::Bar:auth<zef:lizmat>:api<2.0>
 
-say version($identity);       # v0.0.42
+say version($identity);         # v0.0.42
 
-say auth($identity);          # zef:lizmat
+say auth($identity);            # zef:lizmat
 
-say without-auth($identity);  # Foo::Bar:ver<0.0.42>:api<2.0>
+say without-auth($identity);    # Foo::Bar:ver<0.0.42>:api<2.0>
 
-say ecosystem($identity);     # zef
+say ecosystem($identity);       # zef
 
-say nick($identity);          # lizmat
+say nick($identity);            # lizmat
 
-say api($identity);           # 2.0
+say api($identity);             # 2.0
 
-say without-api($identity);   # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>
+say without-api($identity);     # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>
 
-say sanitize($identity);      # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>
+say sanitize($identity);        # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>
 
 say build("Foo::Bar", :ver<0.0.42>);  # Foo::Bar:ver<0.0.42>
+
+say is-short-name($identity);   # False
+say is-short-name("Foo::Bar");  # True
 ```
 
 DESCRIPTION
@@ -103,6 +106,17 @@ say ecosystem($identity); # zef
 ```
 
 Returns the ecosystem part of the `auth` field of the given identity, or `Nil` if no `auth` field could be found.
+
+is-short-name
+-------------
+
+```raku
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+say is-short-name($identity);   # False
+say is-short-name("Foo::Bar");  # True
+```
+
+Returns a boolean indicating whether the given identity consists of just a `short-name`.
 
 nick
 ----

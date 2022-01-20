@@ -1,7 +1,7 @@
 use Test;
 use Identity::Utils;
 
-plan 24;
+plan 26;
 
 my $short-name = "Foo::Bar";
 my $ver        = "0.0.42";
@@ -38,5 +38,8 @@ is without-auth($identity), $short-name ~ ":ver<$ver>:api<$api>",
   'is without-auth ok?';
 is without-ver($identity),  $short-name ~ ":auth<$auth>:api<$api>",
   'is without-ver ok?';
+
+is-deeply is-short-name($identity),  False, 'is-short-name ok? (1)';
+is-deeply is-short-name($short-name), True, 'is-short-name ok? (2)';
 
 # vim: expandtab shiftwidth=4
