@@ -1,7 +1,7 @@
 use Test;
 use Identity::Utils;
 
-plan 26;
+plan 106;
 
 my $short-name = "Foo::Bar";
 my $ver        = "0.0.42";
@@ -10,36 +10,53 @@ my $ecosystem  = "zef";
 my $nick       = "lizmat";
 my $auth       = "$ecosystem:$nick";
 my $api        = "2.0";
-my $identity   = $short-name ~ ":ver<$ver>:auth<$auth>:api<$api>";
+my $from       = "Perl5";
+my $sanitized  = $short-name ~ ":ver<$ver>:auth<$auth>:api<$api>:from<$from>";
 
-is build($short-name, :$ver, :$auth, :$api), $identity, 'is build ok?';
+is build($short-name, :$ver, :$auth, :$api, :$from), $sanitized, 'is build ok?';
 
-my @parts = ":ver<$ver>", ":auth<$auth>", ":api<$api>";
-for @parts.combinations -> @combinations {
-    my $long-name = "$short-name@combinations.join('')";
-    is short-name($long-name), $short-name, "is short-name of $long-name ok?";
+for
+    (":ver<$ver>",   ":auth<$auth>",   ":api<$api>",   ":from<$from>"),
+    (":ver('$ver')", ":auth('$auth')", ":api('$api')", ":from('$from')")
+-> @parts {
+    my $identity = $short-name ~ @parts.join;
+
+    my $sver  := @parts[0];
+    my $sauth := @parts[1];
+    my $sapi  := @parts[2];
+    my $sfrom := @parts[3];
+
+    for @parts.combinations -> @combinations {
+        my $long-name = "$short-name@combinations.join('')";
+        is short-name($long-name), $short-name,
+          "is short-name of $long-name ok?";
+    }
+
+    for @parts.permutations -> @permuted {
+        my $long-name = "$short-name@permuted.join('')";
+        is sanitize($long-name), $sanitized, "is sanitize of $long-name ok?";
+    }
+
+    is ver($identity),            $ver,       'is ver ok?';
+    is-deeply version($identity), $version,   'is version ok?';
+    is auth($identity),           $auth,      'is auth ok?';
+    is ecosystem($identity),      $ecosystem, 'is ecosystem ok?';
+    is nick($identity),           $nick,      'is nick ok?';
+    is api($identity),            $api,       'is api ok?';
+    is from($identity),           $from,      'is from ok?';
+
+    is without-ver($identity),   $short-name ~ $sauth ~ $sapi ~ $sfrom,
+      'is without-ver ok?';
+    is without-auth($identity),  $short-name ~ $sver ~ $sapi ~ $sfrom,
+      'is without-auth ok?';
+    is without-api($identity),   $short-name ~ $sver ~ $sauth ~ $sfrom,
+      'is without-api ok?';
+    is without-from($identity),  $short-name ~ $sver ~ $sauth ~ $sapi,
+      'is without-from ok?';
+
+    is-deeply is-short-name($identity),  False, 'not is-short-name?';
 }
 
-for @parts.permutations -> @permuted {
-    my $long-name = "$short-name@permuted.join('')";
-    is sanitize($long-name), $identity, "is sanitize of $long-name ok?";
-}
-
-is ver($identity),            $ver,       'is ver ok?';
-is-deeply version($identity), $version,   'is version ok?';
-is auth($identity),           $auth,      'is auth ok?';
-is ecosystem($identity),      $ecosystem, 'is ecosystem ok?';
-is nick($identity),           $nick,      'is nick ok?';
-is api($identity),            $api,       'is api ok?';
-
-is without-api($identity),  $short-name ~ ":ver<$ver>:auth<$auth>",
-  'is without-api ok?';
-is without-auth($identity), $short-name ~ ":ver<$ver>:api<$api>",
-  'is without-auth ok?';
-is without-ver($identity),  $short-name ~ ":auth<$auth>:api<$api>",
-  'is without-ver ok?';
-
-is-deeply is-short-name($identity),  False, 'is-short-name ok? (1)';
-is-deeply is-short-name($short-name), True, 'is-short-name ok? (2)';
+is-deeply is-short-name($short-name), True, 'is-short-name ok?';
 
 # vim: expandtab shiftwidth=4

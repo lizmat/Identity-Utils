@@ -11,29 +11,33 @@ SYNOPSIS
 ```raku
 use Identity::Utils;
 
-my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>:from<Perl5>";
 
-say short-name($identity);      # Foo::Bar
+say short-name($identity);   # Foo::Bar
 
-say ver($identity);             # 0.0.42
+say ver($identity);          # 0.0.42
 
-say without-ver($identity);     # Foo::Bar:auth<zef:lizmat>:api<2.0>
+say without-ver($identity);  # Foo::Bar:auth<zef:lizmat>:api<2.0>:from<Perl5>
 
-say version($identity);         # v0.0.42
+say version($identity);      # v0.0.42
 
-say auth($identity);            # zef:lizmat
+say auth($identity);         # zef:lizmat
 
-say without-auth($identity);    # Foo::Bar:ver<0.0.42>:api<2.0>
+say without-auth($identity); # Foo::Bar:ver<0.0.42>:api<2.0>:from<Perl5>
 
-say ecosystem($identity);       # zef
+say ecosystem($identity);    # zef
 
-say nick($identity);            # lizmat
+say nick($identity);         # lizmat
 
-say api($identity);             # 2.0
+say api($identity);          # 2.0
 
-say without-api($identity);     # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>
+say without-api($identity);  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:from<Perl5>
 
-say sanitize($identity);        # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>
+say from($identity);         # Perl5
+
+say without-from($identity); # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>
+
+say sanitize($identity);     # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>:from<Perl5>
 
 say build("Foo::Bar", :ver<0.0.42>);  # Foo::Bar:ver<0.0.42>
 
@@ -107,6 +111,16 @@ say ecosystem($identity); # zef
 
 Returns the ecosystem part of the `auth` field of the given identity, or `Nil` if no `auth` field could be found.
 
+from
+----
+
+```raku
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>:from<Perl5>";
+say from($identity);  # Perl5
+```
+
+Returns the `from` field of the given identity as a `Str`, or `Nil` if no `from` field could be found.
+
 is-short-name
 -------------
 
@@ -176,7 +190,7 @@ my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
 say without-api($identity);  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>
 ```
 
-Returns the identity **without** any `api` field of the given identity
+Returns the identity **without** any `api` field of the given identity.
 
 without-auth
 ------------
@@ -186,7 +200,17 @@ my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
 say without-auth($identity);  # Foo::Bar:ver<0.0.42>:api<2.0>
 ```
 
-Returns the identity **without** any `auth` field of the given identity
+Returns the identity **without** any `auth` field of the given identity.
+
+without-from
+------------
+
+```raku
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:from<Perl5>";
+say without-from($identity);  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>
+```
+
+Returns the identity **without** any `from` field of the given identity.
 
 without-ver
 -----------
@@ -196,7 +220,7 @@ my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
 say without-ver($identity);  # Foo::Bar:auth<zef:lizmat>:api<2.0>
 ```
 
-Returns the identity **without** any `ver` field of the given identity
+Returns the identity **without** any `ver` field of the given identity.
 
 AUTHOR
 ======

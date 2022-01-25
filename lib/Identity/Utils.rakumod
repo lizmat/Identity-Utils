@@ -1,4 +1,25 @@
-use String::Utils:ver<0.0.3>:auth<zef:lizmat>;
+use String::Utils:ver<0.0.5>:auth<zef:lizmat>;
+
+my sub extract(str $identity, str $needle) {
+    if between $identity, $needle ~ '<', '>' -> str $string {
+        $string
+    }
+    elsif between $identity, $needle ~ '(', ')' -> $code {
+        try $code.EVAL
+    }
+    else {
+        Nil
+    }
+}
+my sub remove(str $identity, str $needle) {
+    if between-included($identity, $needle ~ '<', '>')
+      // between-included($identity, $needle ~ '(', ')') -> str $string {
+        $identity.subst($string)
+    }
+    else {
+        Nil
+    }
+}
 
 my sub short-name(str $identity) is export {
     with $identity.rindex('::') -> int $offset {
@@ -18,7 +39,7 @@ my sub short-name(str $identity) is export {
 }
 
 my sub build(str $short-name,
-  :$ver, :$auth, :$api, :$ecosystem = "zef", :$nick
+  :$ver, :$auth, :$api, :$ecosystem = "zef", :$nick, :$from
 ) is export {
     my str @parts = $short-name;
     @parts.push("ver<$ver>") if $ver;
@@ -28,46 +49,59 @@ my sub build(str $short-name,
     orwith $nick {
         @parts.push("auth<$ecosystem:$nick>");
     }
-    @parts.push("api<$api>") if $api && $api ne "0";
+    @parts.push("api<$api>")   if $api  && $api  ne "0";
+    @parts.push("from<$from>") if $from && $from ne "Perl6";
     @parts.join(":")
 }
 
 my sub ver(str $identity) is export {
-    between $identity, ':ver<', '>'
+    extract $identity, ':ver'
 }
 my sub without-ver(str $identity) is export {
-    around $identity, ':ver<', '>'
+    remove $identity, ':ver'
 }
 
 my sub version(str $identity) is export {
-    (.Version with between $identity, ':ver<', '>') // Nil
+    (.Version with extract $identity, ':ver') // Nil
 }
 
 my sub auth(str $identity) is export {
-    between $identity, ':auth<', '>'
+    extract $identity, ':auth'
 }
 my sub without-auth(str $identity) is export {
-    around $identity, ':auth<', '>'
+    remove $identity, ':auth'
 }
 
 my sub ecosystem(str $identity) is export {
-    between $identity, ':auth<', ':'
-}
-
-my sub nick(str $identity) is export {
-    after auth($identity), ':'
-}
-
-my sub api(str $identity) is export {
-    if between($identity, ':api<', '>') -> $api {
-        $api eq "0" ?? Nil !! $api
+    with auth($identity) -> $auth {
+        before $auth, ':'
     }
     else {
         Nil
     }
 }
+
+my sub nick(str $identity) is export {
+    with auth($identity) -> $auth {
+        after $auth, ':'
+    }
+    else {
+        Nil
+    }
+}
+
+my sub api(str $identity) is export {
+    extract $identity, ':api'
+}
 my sub without-api(str $identity) is export {
-    around $identity, ':api<', '>'
+    remove $identity, ':api'
+}
+
+my sub from(str $identity) is export {
+    extract $identity, ':from'
+}
+my sub without-from(str $identity) is export {
+    remove $identity, ':from'
 }
 
 my sub sanitize(str $identity) is export {
@@ -77,14 +111,21 @@ my sub sanitize(str $identity) is export {
     if api($identity) -> $api {
         @parts.push("api<$api>") if $api ne "0";
     }
+    if from($identity) -> $from {
+        @parts.push("from<$from>") if $from ne "Perl6";
+    }
     @parts.join(":")
 }
 
 my sub is-short-name(str $identity) is export {
-    !($identity.contains(':ver<')
-      || $identity.contains(':auth<')
-      || $identity.contains(':api<')
-    )
+    for <:ver :auth :api :from> -> str $needle {
+        with $identity.index($needle) -> int $index {
+            my int $pos = $index + $needle.chars;
+            return False
+              if $identity.substr-eq('<',$pos) || $identity.substr-eq('(',$pos);
+        }
+    }
+    True
 }
 
 =begin pod
@@ -99,29 +140,33 @@ Identity::Utils - Provide utility functions related to distribution identities
 
 use Identity::Utils;
 
-my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>:from<Perl5>";
 
-say short-name($identity);      # Foo::Bar
+say short-name($identity);   # Foo::Bar
 
-say ver($identity);             # 0.0.42
+say ver($identity);          # 0.0.42
 
-say without-ver($identity);     # Foo::Bar:auth<zef:lizmat>:api<2.0>
+say without-ver($identity);  # Foo::Bar:auth<zef:lizmat>:api<2.0>:from<Perl5>
 
-say version($identity);         # v0.0.42
+say version($identity);      # v0.0.42
 
-say auth($identity);            # zef:lizmat
+say auth($identity);         # zef:lizmat
 
-say without-auth($identity);    # Foo::Bar:ver<0.0.42>:api<2.0>
+say without-auth($identity); # Foo::Bar:ver<0.0.42>:api<2.0>:from<Perl5>
 
-say ecosystem($identity);       # zef
+say ecosystem($identity);    # zef
 
-say nick($identity);            # lizmat
+say nick($identity);         # lizmat
 
-say api($identity);             # 2.0
+say api($identity);          # 2.0
 
-say without-api($identity);     # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>
+say without-api($identity);  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:from<Perl5>
 
-say sanitize($identity);        # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>
+say from($identity);         # Perl5
+
+say without-from($identity); # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>
+
+say sanitize($identity);     # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>:from<Perl5>
 
 say build("Foo::Bar", :ver<0.0.42>);  # Foo::Bar:ver<0.0.42>
 
@@ -201,6 +246,18 @@ say ecosystem($identity); # zef
 
 Returns the ecosystem part of the C<auth> field of the given identity, or
 C<Nil> if no C<auth> field could be found.
+
+=head2 from
+
+=begin code :lang<raku>
+
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>:from<Perl5>";
+say from($identity);  # Perl5
+
+=end code
+
+Returns the C<from> field of the given identity as a C<Str>, or C<Nil> if no
+C<from> field could be found.
 
 =head2 is-short-name
 
@@ -284,7 +341,7 @@ say without-api($identity);  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>
 
 =end code
 
-Returns the identity B<without> any C<api> field of the given identity
+Returns the identity B<without> any C<api> field of the given identity.
 
 =head2 without-auth
 
@@ -295,7 +352,18 @@ say without-auth($identity);  # Foo::Bar:ver<0.0.42>:api<2.0>
 
 =end code
 
-Returns the identity B<without> any C<auth> field of the given identity
+Returns the identity B<without> any C<auth> field of the given identity.
+
+=head2 without-from
+
+=begin code :lang<raku>
+
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:from<Perl5>";
+say without-from($identity);  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>
+
+=end code
+
+Returns the identity B<without> any C<from> field of the given identity.
 
 =head2 without-ver
 
@@ -306,7 +374,7 @@ say without-ver($identity);  # Foo::Bar:auth<zef:lizmat>:api<2.0>
 
 =end code
 
-Returns the identity B<without> any C<ver> field of the given identity
+Returns the identity B<without> any C<ver> field of the given identity.
 
 =head1 AUTHOR
 
