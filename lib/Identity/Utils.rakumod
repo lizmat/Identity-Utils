@@ -50,7 +50,7 @@ my sub build(str $short-name,
         @parts.push("auth<$ecosystem:$nick>");
     }
     @parts.push("api<$api>")   if $api  && $api  ne "0";
-    @parts.push("from<$from>") if $from && $from ne "Perl6";
+    @parts.push("from<$from>") if $from && $from ne "Perl6" | "Raku";
     @parts.join(":")
 }
 
@@ -218,8 +218,9 @@ could be found.
 my $ver  = "0.0.42";
 my $auth = "zef:lizmat";
 my $api  = "2.0";
-say build("Foo::Bar", :$ver, :$auth, :$api);
-  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>
+my $from = "Perl5";
+say build("Foo::Bar", :$ver, :$auth, :$api, :$from);
+  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>:from<Perl5>
 
 say build("Foo::Bar", :$ver, :nick<lizmat>);
   # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>
@@ -232,6 +233,7 @@ arguments:
 =item ver  - the "ver" value to be used
 =item auth - the "auth" value to be used, overrides "ecosystem" and "nick"
 =item api  - the "api" value to be used
+=item from - the "from" value to be used, 'Perl6' and 'Raku' will be ignored
 =item ecosystem - the ecosystem part of "auth", defaults to "zef"
 =item nick - the nick part of "auth", unless overridden by "auth"
 

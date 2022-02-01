@@ -2,6 +2,10 @@ Revision history for Identity-Utils
 
 {{$NEXT}}
 
+0.0.7  2022-02-01T14:39:46+01:00
+    - Make sure that "build" also ignores :from<Raku>
+    - Add documentation for :from to "build"
+
 0.0.6  2022-01-25T20:06:15+01:00
     - Add "from" and "without-from"
     - Add general support for ":from<...>"

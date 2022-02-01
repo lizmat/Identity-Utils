@@ -82,8 +82,9 @@ build
 my $ver  = "0.0.42";
 my $auth = "zef:lizmat";
 my $api  = "2.0";
-say build("Foo::Bar", :$ver, :$auth, :$api);
-  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>
+my $from = "Perl5";
+say build("Foo::Bar", :$ver, :$auth, :$api, :$from);
+  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>:from<Perl5>
 
 say build("Foo::Bar", :$ver, :nick<lizmat>);
   # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>
@@ -96,6 +97,8 @@ Builds an identity string from the given short name and optional named arguments
   * auth - the "auth" value to be used, overrides "ecosystem" and "nick"
 
   * api - the "api" value to be used
+
+  * from - the "from" value to be used, 'Perl6' and 'Raku' will be ignored
 
   * ecosystem - the ecosystem part of "auth", defaults to "zef"
 

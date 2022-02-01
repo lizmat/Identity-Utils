@@ -1,7 +1,7 @@
 use Test;
 use Identity::Utils;
 
-plan 106;
+plan 108;
 
 my $short-name = "Foo::Bar";
 my $ver        = "0.0.42";
@@ -58,5 +58,9 @@ for
 }
 
 is-deeply is-short-name($short-name), True, 'is-short-name ok?';
+
+for <Perl6 Raku> {
+    is build($short-name, :from($_)), $short-name, "is from<$_> ignored?";
+}
 
 # vim: expandtab shiftwidth=4
