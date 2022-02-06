@@ -2,6 +2,9 @@ Revision history for Identity-Utils
 
 {{$NEXT}}
 
+0.0.8  2022-02-06T18:26:52+01:00
+    - Make sure the without-xxx subs return target if not found
+
 0.0.7  2022-02-01T14:39:46+01:00
     - Make sure that "build" also ignores :from<Raku>
     - Add documentation for :from to "build"

@@ -45,14 +45,33 @@ for
     is api($identity),            $api,       'is api ok?';
     is from($identity),           $from,      'is from ok?';
 
-    is without-ver($identity),   $short-name ~ $sauth ~ $sapi ~ $sfrom,
-      'is without-ver ok?';
-    is without-auth($identity),  $short-name ~ $sver ~ $sapi ~ $sfrom,
-      'is without-auth ok?';
-    is without-api($identity),   $short-name ~ $sver ~ $sauth ~ $sfrom,
-      'is without-api ok?';
-    is without-from($identity),  $short-name ~ $sver ~ $sauth ~ $sapi,
-      'is without-from ok?';
+    subtest 'without-ver' => {
+        plan 2;
+        my $without := $short-name ~ $sauth ~ $sapi ~ $sfrom;
+        is without-ver($identity), $without, 'is without-ver (1) ok?';
+        is without-ver($without),  $without, 'is without-ver (2) ok?';
+    }
+
+    subtest 'without-auth' => {
+        plan 2;
+        my $without := $short-name ~ $sver ~ $sapi ~ $sfrom;
+        is without-auth($identity), $without, 'is without-auth (1) ok?';
+        is without-auth($without),  $without, 'is without-auth (2) ok?';
+    }
+
+    subtest 'without-api' => {
+        plan 2;
+        my $without := $short-name ~ $sver ~ $sauth ~ $sfrom;
+        is without-api($identity), $without, 'is without-api (1) ok?';
+        is without-api($without),  $without, 'is without-api (2) ok?';
+    }
+
+    subtest 'without-api' => {
+        plan 2;
+        my $without := $short-name ~ $sver ~ $sauth ~ $sapi;
+        is without-from($identity), $without, 'is without-from (1) ok?';
+        is without-from($without),  $without, 'is without-from (2) ok?';
+    }
 
     is-deeply is-short-name($identity),  False, 'not is-short-name?';
 }

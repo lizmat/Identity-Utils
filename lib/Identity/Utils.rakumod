@@ -17,7 +17,7 @@ my sub remove(str $identity, str $needle) {
         $identity.subst($string)
     }
     else {
-        Nil
+        $identity
     }
 }
 
