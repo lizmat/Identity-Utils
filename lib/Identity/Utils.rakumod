@@ -118,14 +118,14 @@ my sub sanitize(str $identity) is export {
 }
 
 my sub is-short-name(str $identity) is export {
-    for <:ver :auth :api :from> -> str $needle {
-        with $identity.index($needle) -> int $index {
-            my int $pos = $index + $needle.chars;
-            return False
-              if $identity.substr-eq('<',$pos) || $identity.substr-eq('(',$pos);
-        }
-    }
-    True
+    short-name($identity) eq $identity
+}
+
+my sub is-pinned(str $identity) is export {
+    so auth($identity)
+      && (my $version := version $identity)
+      && !$version.plus
+      && !$version.whatever
 }
 
 =begin pod
@@ -172,6 +172,9 @@ say build("Foo::Bar", :ver<0.0.42>);  # Foo::Bar:ver<0.0.42>
 
 say is-short-name($identity);   # False
 say is-short-name("Foo::Bar");  # True
+
+say is-pinned($identity);   # True
+say is-pinned("Foo::Bar");  # False
 
 =end code
 
@@ -260,6 +263,20 @@ say from($identity);  # Perl5
 
 Returns the C<from> field of the given identity as a C<Str>, or C<Nil> if no
 C<from> field could be found.
+
+=head2 is-pinned
+
+=begin code :lang<raku>
+
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+say is-pinned($identity);   # True
+say is-pinned("Foo::Bar");  # False
+
+=end code
+
+Returns a boolean indicating whether the given identity is considered to
+be pinned to a specific release.  This implies: having an C<auth> and having
+a version B<without> a C<+> or a C<*> in it.
 
 =head2 is-short-name
 

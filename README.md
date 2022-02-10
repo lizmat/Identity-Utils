@@ -43,6 +43,9 @@ say build("Foo::Bar", :ver<0.0.42>);  # Foo::Bar:ver<0.0.42>
 
 say is-short-name($identity);   # False
 say is-short-name("Foo::Bar");  # True
+
+say is-pinned($identity);   # True
+say is-pinned("Foo::Bar");  # False
 ```
 
 DESCRIPTION
@@ -123,6 +126,17 @@ say from($identity);  # Perl5
 ```
 
 Returns the `from` field of the given identity as a `Str`, or `Nil` if no `from` field could be found.
+
+is-pinned
+---------
+
+```raku
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+say is-pinned($identity);   # True
+say is-pinned("Foo::Bar");  # False
+```
+
+Returns a boolean indicating whether the given identity is considered to be pinned to a specific release. This implies: having an `auth` and having a version **without** a `+` or a `*` in it.
 
 is-short-name
 -------------

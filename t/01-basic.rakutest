@@ -1,7 +1,7 @@
 use Test;
 use Identity::Utils;
 
-plan 108;
+plan 110;
 
 my $short-name = "Foo::Bar";
 my $ver        = "0.0.42";
@@ -81,5 +81,8 @@ is-deeply is-short-name($short-name), True, 'is-short-name ok?';
 for <Perl6 Raku> {
     is build($short-name, :from($_)), $short-name, "is from<$_> ignored?";
 }
+
+is-deeply is-pinned($sanitized),   True, 'is is-pinned (1) ok?';
+is-deeply is-pinned($short-name), False, 'is is-pinned (2) ok?';
 
 # vim: expandtab shiftwidth=4
