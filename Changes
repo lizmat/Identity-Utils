@@ -2,6 +2,10 @@ Revision history for Identity-Utils
 
 {{$NEXT}}
 
+0.0.10  2022-05-06T15:14:14+02:00
+    - Fix one more "from" test wrt Raku | Perl6
+    - Add sponsorship link
+
 0.0.9  2022-02-10T18:47:19+01:00
     - Add "is-pinned"
     - Simplify the internal logic of "is-short-name"

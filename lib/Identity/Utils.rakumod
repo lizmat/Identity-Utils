@@ -112,7 +112,8 @@ my sub sanitize(str $identity) is export {
         @parts.push("api<$api>") if $api ne "0";
     }
     if from($identity) -> $from {
-        @parts.push("from<$from>") if $from ne "Perl6";
+        @parts.push("from<$from>")
+          unless $from eq 'Raku' | 'Perl6';
     }
     @parts.join(":")
 }
@@ -401,6 +402,10 @@ Elizabeth Mattijsen <liz@raku.rocks>
 
 Source can be located at: https://github.com/lizmat/Identity-Utils . Comments
 and Pull Requests are welcome.
+
+If you like this module, or what I’m doing more generally, committing to a
+L<small sponsorship|https://github.com/sponsors/lizmat/>  would mean a great
+deal to me!
 
 =head1 COPYRIGHT AND LICENSE
 
