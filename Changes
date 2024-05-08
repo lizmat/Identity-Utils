@@ -2,6 +2,10 @@ Revision history for Identity-Utils
 
 {{$NEXT}}
 
+0.0.11  2024-05-08T16:00:40+02:00
+    - Up dependency on String::Utils
+    - Update copyright year
+
 0.0.10  2022-05-06T15:14:14+02:00
     - Fix one more "from" test wrt Raku | Perl6
     - Add sponsorship link

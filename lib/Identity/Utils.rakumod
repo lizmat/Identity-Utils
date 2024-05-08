@@ -1,4 +1,4 @@
-use String::Utils:ver<0.0.5>:auth<zef:lizmat>;
+use String::Utils:ver<0.0.22+>:auth<zef:lizmat>;
 
 my sub extract(str $identity, str $needle) {
     if between $identity, $needle ~ '<', '>' -> str $string {
@@ -409,7 +409,7 @@ deal to me!
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2022 Elizabeth Mattijsen
+Copyright 2022, 2024 Elizabeth Mattijsen
 
 This library is free software; you can redistribute it and/or modify it under the Artistic License 2.0.
 
