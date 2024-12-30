@@ -1,0 +1,473 @@
+=begin pod
+
+=head1 NAME
+
+Identity::Utils - Provide utility functions related to distribution identities
+
+=head1 SYNOPSIS
+
+=begin code :lang<raku>
+
+use Identity::Utils;
+
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>:from<Perl5>";
+
+say short-name($identity);   # Foo::Bar
+
+say ver($identity);          # 0.0.42
+
+say without-ver($identity);  # Foo::Bar:auth<zef:lizmat>:api<2.0>:from<Perl5>
+
+say version($identity);      # v0.0.42
+
+say auth($identity);         # zef:lizmat
+
+say without-auth($identity); # Foo::Bar:ver<0.0.42>:api<2.0>:from<Perl5>
+
+say ecosystem($identity);    # zef
+
+say nick($identity);         # lizmat
+
+say api($identity);          # 2.0
+
+say without-api($identity);  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:from<Perl5>
+
+say from($identity);         # Perl5
+
+say without-from($identity); # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>
+
+say sanitize($identity);     # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>:from<Perl5>
+
+say build("Foo::Bar", :ver<0.0.42>);  # Foo::Bar:ver<0.0.42>
+
+say is-short-name($identity);   # False
+say is-short-name("Foo::Bar");  # True
+
+say is-pinned($identity);   # True
+say is-pinned("Foo::Bar");  # False
+
+my $spec        = dependency-specification($identity);
+my $compunit    = compunit($identity);
+my $meta        = meta($identity, $repo);
+my $source-io   = source-io($identity, $repo);
+my $source      = source($identity, $repo);
+my $bytecode-io = bytecode-io($identity, $repo);
+my $bytecode    = bytecode($identity, $repo);
+
+use Identity::Utils <short-name auth>;  # only import "short-name" and "auth"
+
+=end code
+
+=head1 DESCRIPTION
+
+Identity::Utils provides some utility functions for inspecting various
+aspects of distribution identity strings.  They assume any given string
+is a well-formed identity in the form C<name:ver<0.0.1>:auth<eco:nick>>
+with an optional C<api:<1>> field.
+
+A general note with regards to C<api>: if it consists of C<"0">, then it is
+assumed there is B<no> api field specified.
+
+=head1 SELECTIVE IMPORTING
+
+=begin code :lang<raku>
+
+use Identity::Utils <short-name auth>;  # only import "short-name" and "auth"
+
+=end code
+
+By default all utility functions are exported.  But you can limit this to
+the functions you actually need by specifying the names in the C<use>
+statement.
+
+To prevent name collisions and/or import any subroutine with a more
+memorable name, one can use the "original-name:known-as" syntax.  A
+semi-colon in a specified string indicates the name by which the subroutine
+is known in this distribution, followed by the name with which it will be
+known in the lexical context in which the C<use> command is executed.
+
+=begin code :lang<raku>
+
+use Identity::Utils <short-name:name>;  # import "short-name" as "name"
+
+say name("Identity::Utils:auth<zef:lizmat>");  # Identity::Utils
+
+=end code
+
+=head1 SUBROUTINES
+
+=head2 api
+
+=begin code :lang<raku>
+
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+say api($identity); # 2.0
+
+=end code
+
+Returns the C<api> field of the given identity, or C<Nil> if no C<api> field
+could be found.
+
+=head2 auth
+
+=begin code :lang<raku>
+
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+say auth($identity); # zef:lizmat
+
+=end code
+
+Returns the C<auth> field of the given identity, or C<Nil> if no C<auth> field
+could be found.
+
+=head2 build
+
+=begin code :lang<raku>
+
+my $ver  = "0.0.42";
+my $auth = "zef:lizmat";
+my $api  = "2.0";
+my $from = "Perl5";
+say build("Foo::Bar", :$ver, :$auth, :$api, :$from);
+  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>:from<Perl5>
+
+say build("Foo::Bar", :$ver, :nick<lizmat>);
+  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>
+
+=end code
+
+Builds an identity string from the given short name and optional named
+arguments:
+
+=item ver  - the "ver" value to be used
+=item auth - the "auth" value to be used, overrides "ecosystem" and "nick"
+=item api  - the "api" value to be used
+=item from - the "from" value to be used, 'Perl6' and 'Raku' will be ignored
+=item ecosystem - the ecosystem part of "auth", defaults to "zef"
+=item nick - the nick part of "auth", unless overridden by "auth"
+
+=head2 bytecode
+
+=begin code :lang<raku>
+
+my $buf = bytecode($identity);       # default: $*REPO
+
+my $buf = bytecode($identity, ".");  # as if with -I.
+
+=end code
+
+Returns a C<Buf> object with the precompiled bytecode of the
+given identity and the currently active repository
+(L<C<$*REPO>|https://docs.raku.org/language/compilation#$*REPO>).
+
+It is also possible to override the repository (chain) by specifying
+a second argument, this can be an object of type:
+=item C<Str> - indicate a path for a ::FileSystem repo, just as with -I.
+=item C<IO::Path> - indicate a path for a ::FileSystem repo
+=item C<CompUnit::Repository> - the actual repo to use
+
+Returns C<Nil> if the given identity could not be found, or there
+is no bytecode file for the short-name of the given identity (yet).
+
+=head2 bytecode-io
+
+=begin code :lang<raku>
+
+my $io = bytecode-io($identity);       # default: $*REPO
+
+my $io = bytecode-io($identity, ".");  # as if with -I.
+
+=end code
+
+Returns an C<IO::Path> object of the precompiled bytecode of the
+given identity and the currently active repository
+(L<C<$*REPO>|https://docs.raku.org/language/compilation#$*REPO>).
+
+It is also possible to override the repository (chain) by specifying
+a second argument, this can be an object of type:
+=item C<Str> - indicate a path for a ::FileSystem repo, just as with -I.
+=item C<IO::Path> - indicate a path for a ::FileSystem repo
+=item C<CompUnit::Repository> - the actual repo to use
+
+Returns C<Nil> if the given identity could not be found, or there
+is no bytecode file for the short-name of the given identity (yet).
+
+=head2 compunit
+
+=begin code :lang<raku>
+
+my $compunit = compunit($identity);       # default: $*REPO
+
+my $compunit = compunit($identity, ".");  # as if with -I.
+
+=end code
+
+Returns a L<C<Compunit>|https://docs.raku.org/type/CompUnit> object for
+the given identity and the currently active repository
+(L<C<$*REPO>|https://docs.raku.org/language/compilation#$*REPO>).
+
+It is also possible to override the repository (chain) by specifying
+a second argument, this can be an object of type:
+=item C<Str> - indicate a path for a ::FileSystem repo, just as with -I.
+=item C<IO::Path> - indicate a path for a ::FileSystem repo
+=item C<CompUnit::Repository> - the actual repo to use
+
+Returns C<Nil> if the given identity could not be found.
+
+=head2 dependency-specification
+
+=begin code :lang<raku>
+
+my $spec = dependency-specification($identity);
+
+=end code
+
+Creates a C<CompUnit::DependencySpecification> object for the given
+identity.
+
+=head2 ecosystem
+
+=begin code :lang<raku>
+
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+say ecosystem($identity); # zef
+
+=end code
+
+Returns the ecosystem part of the C<auth> field of the given identity, or
+C<Nil> if no C<auth> field could be found.
+
+=head2 from
+
+=begin code :lang<raku>
+
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>:from<Perl5>";
+say from($identity);  # Perl5
+
+=end code
+
+Returns the C<from> field of the given identity as a C<Str>, or C<Nil> if no
+C<from> field could be found.
+
+=head2 is-pinned
+
+=begin code :lang<raku>
+
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+say is-pinned($identity);   # True
+say is-pinned("Foo::Bar");  # False
+
+=end code
+
+Returns a boolean indicating whether the given identity is considered to
+be pinned to a specific release.  This implies: having an C<auth> and having
+a version B<without> a C<+> or a C<*> in it.
+
+=head2 is-short-name
+
+=begin code :lang<raku>
+
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+say is-short-name($identity);   # False
+say is-short-name("Foo::Bar");  # True
+
+=end code
+
+Returns a boolean indicating whether the given identity consists of just a
+C<short-name>.
+
+=head2 meta
+
+=begin code :lang<raku>
+
+my $meta = meta($identity);       # default: $*REPO
+
+my $meta = meta($identity, ".");  # as if with -I.
+
+=end code
+
+Returns a hash with the meta information of the given identity
+and the currently active repository
+(L<C<$*REPO>|https://docs.raku.org/language/compilation#$*REPO>) as
+typically found in the C<META6.json> file of a distribution.
+
+It is also possible to override the repository (chain) by specifying
+a second argument, this can be an object of type:
+=item C<Str> - indicate a path for a ::FileSystem repo, just as with -I.
+=item C<IO::Path> - indicate a path for a ::FileSystem repo
+=item C<CompUnit::Repository> - the actual repo to use
+
+Returns C<Nil> if the given identity could not be found.
+
+=head2 nick
+
+=begin code :lang<raku>
+
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+say nick($identity); # lizmat
+
+=end code
+
+Returns the nickname part of the C<auth> field of the given identity, or
+C<Nil> if no C<auth> field could be found.
+
+=head2 sanitize
+
+=begin code :lang<raku>
+
+my $identity = "Foo::Bar:auth<zef:lizmat>:ver<0.0.42>:api<2.0>";
+say sanitize($identity);  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>
+
+=end code
+
+Returns a version of the given identity in which any C<ver>, C<auth> and
+C<api> fields are put in the correct order.
+
+=head2 short-name
+
+=begin code :lang<raku>
+
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+say short-name($identity);  # Foo::Bar
+
+=end code
+
+Returns the short name part of the given identity, or the identity itself
+if no C<ver>, C<auth> or C<api> fields could be found.
+
+=head2 source
+
+=begin code :lang<raku>
+
+say source($identity);       # default: $*REPO
+
+say source($identity, ".");  # as if with -I.
+
+=end code
+
+Returns the source-code of the given identity and the currently
+active repository
+(L<C<$*REPO>|https://docs.raku.org/language/compilation#$*REPO>) as
+typically found in the C<lib> directory of a distribution.
+
+It is also possible to override the repository (chain) by specifying
+a second argument, this can be an object of type:
+=item C<Str> - indicate a path for a ::FileSystem repo, just as with -I.
+=item C<IO::Path> - indicate a path for a ::FileSystem repo
+=item C<CompUnit::Repository> - the actual repo to use
+
+Returns C<Nil> if the given identity could not be found, or there
+is no source-file for the short-name of the given identity.
+
+=head2 source-io
+
+=begin code :lang<raku>
+
+my $io = source-io($identity);       # default: $*REPO
+
+my $io = source-io($identity, ".");  # as if with -I.
+
+=end code
+
+Returns an C<IO::Path> object of the source of the given identity
+and the currently active repository
+(L<C<$*REPO>|https://docs.raku.org/language/compilation#$*REPO>) as
+typically found in the C<lib> directory of a distribution.
+
+It is also possible to override the repository (chain) by specifying
+a second argument, this can be an object of type:
+=item C<Str> - indicate a path for a ::FileSystem repo, just as with -I.
+=item C<IO::Path> - indicate a path for a ::FileSystem repo
+=item C<CompUnit::Repository> - the actual repo to use
+
+Returns C<Nil> if the given identity could not be found, or there
+is no source-file for the short-name of the given identity.
+
+=head2 ver
+
+=begin code :lang<raku>
+
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+say ver($identity);  # 0.0.42
+
+=end code
+
+Returns the C<ver> field of the given identity as a C<Str>, or C<Nil> if no
+C<ver> field could be found.
+
+=head2 version
+
+=begin code :lang<raku>
+
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+say version($identity);  # v0.0.42
+
+=end code
+
+Returns the C<ver> field of the given identity as a C<Version> object, or
+C<Nil> if no C<ver> field could be found.
+
+=head2 without-api
+
+=begin code :lang<raku>
+
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+say without-api($identity);  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>
+
+=end code
+
+Returns the identity B<without> any C<api> field of the given identity.
+
+=head2 without-auth
+
+=begin code :lang<raku>
+
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+say without-auth($identity);  # Foo::Bar:ver<0.0.42>:api<2.0>
+
+=end code
+
+Returns the identity B<without> any C<auth> field of the given identity.
+
+=head2 without-from
+
+=begin code :lang<raku>
+
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:from<Perl5>";
+say without-from($identity);  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>
+
+=end code
+
+Returns the identity B<without> any C<from> field of the given identity.
+
+=head2 without-ver
+
+=begin code :lang<raku>
+
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+say without-ver($identity);  # Foo::Bar:auth<zef:lizmat>:api<2.0>
+
+=end code
+
+Returns the identity B<without> any C<ver> field of the given identity.
+
+=head1 AUTHOR
+
+Elizabeth Mattijsen <liz@raku.rocks>
+
+Source can be located at: https://github.com/lizmat/Identity-Utils . Comments
+and Pull Requests are welcome.
+
+If you like this module, or what I’m doing more generally, committing to a
+L<small sponsorship|https://github.com/sponsors/lizmat/>  would mean a great
+deal to me!
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2022, 2024 Elizabeth Mattijsen
+
+This library is free software; you can redistribute it and/or modify it under the Artistic License 2.0.
+
+=end pod
+
+# vim: expandtab shiftwidth=4

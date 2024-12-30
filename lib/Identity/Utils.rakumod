@@ -1,4 +1,4 @@
-use String::Utils:ver<0.0.22+>:auth<zef:lizmat>;
+use String::Utils:ver<0.0.32+>:auth<zef:lizmat>;
 
 my sub extract(str $identity, str $needle) {
     if between $identity, $needle ~ '<', '>' -> str $string {
@@ -21,7 +21,7 @@ my sub remove(str $identity, str $needle) {
     }
 }
 
-my sub short-name(str $identity) is export {
+my sub short-name(str $identity) {
     with $identity.rindex('::') -> int $offset {
         with $identity.index(':', $offset + 2) -> int $chars {
             $identity.substr(0, $chars)
@@ -40,7 +40,7 @@ my sub short-name(str $identity) is export {
 
 my sub build(str $short-name,
   :$ver, :$auth, :$api, :$ecosystem = "zef", :$nick, :$from
-) is export {
+) {
     my str @parts = $short-name;
     @parts.push("ver<$ver>") if $ver;
     if $auth {
@@ -54,25 +54,25 @@ my sub build(str $short-name,
     @parts.join(":")
 }
 
-my sub ver(str $identity) is export {
+my sub ver(str $identity) {
     extract $identity, ':ver'
 }
-my sub without-ver(str $identity) is export {
+my sub without-ver(str $identity) {
     remove $identity, ':ver'
 }
 
-my sub version(str $identity) is export {
+my sub version(str $identity) {
     (.Version with extract $identity, ':ver') // Nil
 }
 
-my sub auth(str $identity) is export {
+my sub auth(str $identity) {
     extract $identity, ':auth'
 }
-my sub without-auth(str $identity) is export {
+my sub without-auth(str $identity) {
     remove $identity, ':auth'
 }
 
-my sub ecosystem(str $identity) is export {
+my sub ecosystem(str $identity) {
     with auth($identity) -> $auth {
         before $auth, ':'
     }
@@ -81,7 +81,7 @@ my sub ecosystem(str $identity) is export {
     }
 }
 
-my sub nick(str $identity) is export {
+my sub nick(str $identity) {
     with auth($identity) -> $auth {
         after $auth, ':'
     }
@@ -90,21 +90,21 @@ my sub nick(str $identity) is export {
     }
 }
 
-my sub api(str $identity) is export {
+my sub api(str $identity) {
     extract $identity, ':api'
 }
-my sub without-api(str $identity) is export {
+my sub without-api(str $identity) {
     remove $identity, ':api'
 }
 
-my sub from(str $identity) is export {
+my sub from(str $identity) {
     extract $identity, ':from'
 }
-my sub without-from(str $identity) is export {
+my sub without-from(str $identity) {
     remove $identity, ':from'
 }
 
-my sub sanitize(str $identity) is export {
+my sub sanitize(str $identity) {
     my str @parts = short-name($identity);
     @parts.push("ver<$_>")  with ver($identity);
     @parts.push("auth<$_>") with auth($identity);
@@ -118,301 +118,112 @@ my sub sanitize(str $identity) is export {
     @parts.join(":")
 }
 
-my sub is-short-name(str $identity) is export {
+my sub is-short-name(str $identity) {
     short-name($identity) eq $identity
 }
 
-my sub is-pinned(str $identity) is export {
+my sub is-pinned(str $identity) {
     so auth($identity)
       && (my $version := version $identity)
       && !$version.plus
       && !$version.whatever
 }
 
-=begin pod
-
-=head1 NAME
-
-Identity::Utils - Provide utility functions related to distribution identities
-
-=head1 SYNOPSIS
-
-=begin code :lang<raku>
-
-use Identity::Utils;
-
-my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>:from<Perl5>";
-
-say short-name($identity);   # Foo::Bar
-
-say ver($identity);          # 0.0.42
-
-say without-ver($identity);  # Foo::Bar:auth<zef:lizmat>:api<2.0>:from<Perl5>
-
-say version($identity);      # v0.0.42
-
-say auth($identity);         # zef:lizmat
-
-say without-auth($identity); # Foo::Bar:ver<0.0.42>:api<2.0>:from<Perl5>
-
-say ecosystem($identity);    # zef
-
-say nick($identity);         # lizmat
-
-say api($identity);          # 2.0
-
-say without-api($identity);  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:from<Perl5>
-
-say from($identity);         # Perl5
-
-say without-from($identity); # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>
-
-say sanitize($identity);     # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>:from<Perl5>
-
-say build("Foo::Bar", :ver<0.0.42>);  # Foo::Bar:ver<0.0.42>
-
-say is-short-name($identity);   # False
-say is-short-name("Foo::Bar");  # True
-
-say is-pinned($identity);   # True
-say is-pinned("Foo::Bar");  # False
-
-=end code
-
-=head1 DESCRIPTION
-
-Identity::Utils provides some utility functions for inspecting various aspects
-of distribution identity strings.  They assume any given string is a
-well-formed identity in the form C<name:ver<0.0.1>:auth<eco:nick>> with an
-optional C<api:<1>> field.
-
-A general note with regards to C<api>: if it consists of C<"0">, then it is
-assumed there is B<no> api field specified.
-
-=head1 SUBROUTINES
-
-=head2 api
-
-=begin code :lang<raku>
-
-my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-say api($identity); # 2.0
-
-=end code
-
-Returns the C<api> field of the given identity, or C<Nil> if no C<api> field
-could be found.
-
-=head2 auth
-
-=begin code :lang<raku>
-
-my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-say auth($identity); # zef:lizmat
-
-=end code
-
-Returns the C<auth> field of the given identity, or C<Nil> if no C<auth> field
-could be found.
-
-=head2 build
-
-=begin code :lang<raku>
-
-my $ver  = "0.0.42";
-my $auth = "zef:lizmat";
-my $api  = "2.0";
-my $from = "Perl5";
-say build("Foo::Bar", :$ver, :$auth, :$api, :$from);
-  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>:from<Perl5>
-
-say build("Foo::Bar", :$ver, :nick<lizmat>);
-  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>
-
-=end code
-
-Builds an identity string from the given short name and optional named
-arguments:
-
-=item ver  - the "ver" value to be used
-=item auth - the "auth" value to be used, overrides "ecosystem" and "nick"
-=item api  - the "api" value to be used
-=item from - the "from" value to be used, 'Perl6' and 'Raku' will be ignored
-=item ecosystem - the ecosystem part of "auth", defaults to "zef"
-=item nick - the nick part of "auth", unless overridden by "auth"
-
-=head2 ecosystem
-
-=begin code :lang<raku>
-
-my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-say ecosystem($identity); # zef
-
-=end code
-
-Returns the ecosystem part of the C<auth> field of the given identity, or
-C<Nil> if no C<auth> field could be found.
-
-=head2 from
-
-=begin code :lang<raku>
-
-my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>:from<Perl5>";
-say from($identity);  # Perl5
-
-=end code
-
-Returns the C<from> field of the given identity as a C<Str>, or C<Nil> if no
-C<from> field could be found.
-
-=head2 is-pinned
-
-=begin code :lang<raku>
-
-my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-say is-pinned($identity);   # True
-say is-pinned("Foo::Bar");  # False
-
-=end code
-
-Returns a boolean indicating whether the given identity is considered to
-be pinned to a specific release.  This implies: having an C<auth> and having
-a version B<without> a C<+> or a C<*> in it.
-
-=head2 is-short-name
-
-=begin code :lang<raku>
-
-my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-say is-short-name($identity);   # False
-say is-short-name("Foo::Bar");  # True
-
-=end code
-
-Returns a boolean indicating whether the given identity consists of just a
-C<short-name>.
-
-=head2 nick
-
-=begin code :lang<raku>
-
-my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-say nick($identity); # lizmat
-
-=end code
-
-Returns the nickname part of the C<auth> field of the given identity, or
-C<Nil> if no C<auth> field could be found.
-
-=head2 sanitize
-
-=begin code :lang<raku>
-
-my $identity = "Foo::Bar:auth<zef:lizmat>:ver<0.0.42>:api<2.0>";
-say sanitize($identity);  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>
-
-=end code
-
-Returns a version of the given identity in which any C<ver>, C<auth> and
-C<api> fields are put in the correct order.
-
-=head2 short-name
-
-=begin code :lang<raku>
-
-my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-say short-name($identity);  # Foo::Bar
-
-=end code
-
-Returns the short name part of the given identity, or the identity itself
-if no C<ver>, C<auth> or C<api> fields could be found.
-
-=head2 ver
-
-=begin code :lang<raku>
-
-my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-say ver($identity);  # 0.0.42
-
-=end code
-
-Returns the C<ver> field of the given identity as a C<Str>, or C<Nil> if no
-C<ver> field could be found.
-
-=head2 version
-
-=begin code :lang<raku>
-
-my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-say version($identity);  # v0.0.42
-
-=end code
-
-Returns the C<ver> field of the given identity as a C<Version> object, or
-C<Nil> if no C<ver> field could be found.
-
-=head2 without-api
-
-=begin code :lang<raku>
-
-my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-say without-api($identity);  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>
-
-=end code
-
-Returns the identity B<without> any C<api> field of the given identity.
-
-=head2 without-auth
-
-=begin code :lang<raku>
-
-my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-say without-auth($identity);  # Foo::Bar:ver<0.0.42>:api<2.0>
-
-=end code
-
-Returns the identity B<without> any C<auth> field of the given identity.
-
-=head2 without-from
-
-=begin code :lang<raku>
-
-my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:from<Perl5>";
-say without-from($identity);  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>
-
-=end code
-
-Returns the identity B<without> any C<from> field of the given identity.
-
-=head2 without-ver
-
-=begin code :lang<raku>
-
-my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
-say without-ver($identity);  # Foo::Bar:auth<zef:lizmat>:api<2.0>
-
-=end code
-
-Returns the identity B<without> any C<ver> field of the given identity.
-
-=head1 AUTHOR
-
-Elizabeth Mattijsen <liz@raku.rocks>
-
-Source can be located at: https://github.com/lizmat/Identity-Utils . Comments
-and Pull Requests are welcome.
-
-If you like this module, or what I’m doing more generally, committing to a
-L<small sponsorship|https://github.com/sponsors/lizmat/>  would mean a great
-deal to me!
-
-=head1 COPYRIGHT AND LICENSE
-
-Copyright 2022, 2024 Elizabeth Mattijsen
-
-This library is free software; you can redistribute it and/or modify it under the Artistic License 2.0.
-
-=end pod
+my sub dependency-specification(str $identity) {
+     CompUnit::DependencySpecification.new:
+       short-name   => short-name($identity),
+       auth-matcher => auth($identity) // True,
+       ver-matcher  => ver($identity)  // True,
+       api-matcher  => api($identity)  // True
+}
+
+my sub compunit(str $identity, $REPO? is copy) {
+    if $REPO.defined {
+        if $REPO ~~ Str | IO::Path {
+            $REPO = CompUnit::Repository::FileSystem.new(:prefix($REPO));
+        }
+        elsif $REPO ~~ CompUnit::Repository {
+            # already ok
+        }
+        else {
+            return Nil;
+        }
+    }
+    else {
+        $REPO = $*REPO;
+    }
+    $REPO.resolve(dependency-specification($identity)) // Nil
+}
+
+my sub meta(str $identity, $REPO?) {
+    compunit($identity, $REPO) andthen .distribution.meta
+}
+
+my sub source-io(str $identity, $REPO?) {
+    with compunit($identity, $REPO) -> $compunit {
+        with $compunit.distribution.meta<provides> {
+            return $compunit.repo.prefix.add(.{short-name($identity)});
+        }
+    }
+    Nil
+}
+
+my sub source(str $identity, $REPO?) {
+    with source-io($identity, $REPO) {
+        .e ?? .slurp !! Nil
+    }
+    else {
+        Nil
+    }
+}
+
+my sub bytecode-io(str $identity, $REPO?) {
+    with compunit($identity, $REPO) {
+        my $repo := .repo;
+        my $io   := $repo.prefix;
+        if $repo ~~ CompUnit::Repository::Installation {
+            $io := $io.add("precomp");
+        }
+        elsif $repo ~~ CompUnit::Repository::FileSystem {
+            $io := $io.add(".precomp");
+        }
+        else {
+            return Nil;
+        }
+
+        my $repo-id := .repo-id;
+        $io.add(Compiler.id).add($repo-id.substr(0,2)).add($repo-id)
+    }
+    else {
+        Nil
+    }
+}
+
+my sub bytecode(str $identity, $REPO?) {
+    with bytecode-io($identity, $REPO) {
+        .e ?? .slurp(:bin) !! Nil
+    }
+    else {
+        Nil
+    }
+}
+
+my sub EXPORT(*@names) {
+    Map.new: @names
+      ?? @names.map: {
+             if UNIT::{"&$_"}:exists {
+                 UNIT::{"&$_"}:p
+             }
+             else {
+                 my ($in,$out) = .split(':', 2);
+                 if $out && UNIT::{"&$in"} -> &code {
+                     Pair.new: "&$out", &code
+                 }
+             }
+         }
+      !! UNIT::.grep: {
+             .key.starts-with('&') && !(.key eq '&EXPORT')
+         }
+}
 
 # vim: expandtab shiftwidth=4

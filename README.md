@@ -1,4 +1,4 @@
-[![Actions Status](https://github.com/lizmat/Identity-Utils/workflows/test/badge.svg)](https://github.com/lizmat/Identity-Utils/actions)
+[![Actions Status](https://github.com/lizmat/Identity-Utils/actions/workflows/linux.yml/badge.svg)](https://github.com/lizmat/Identity-Utils/actions) [![Actions Status](https://github.com/lizmat/Identity-Utils/actions/workflows/macos.yml/badge.svg)](https://github.com/lizmat/Identity-Utils/actions) [![Actions Status](https://github.com/lizmat/Identity-Utils/actions/workflows/windows.yml/badge.svg)](https://github.com/lizmat/Identity-Utils/actions)
 
 NAME
 ====
@@ -46,6 +46,16 @@ say is-short-name("Foo::Bar");  # True
 
 say is-pinned($identity);   # True
 say is-pinned("Foo::Bar");  # False
+
+my $spec        = dependency-specification($identity);
+my $compunit    = compunit($identity);
+my $meta        = meta($identity, $repo);
+my $source-io   = source-io($identity, $repo);
+my $source      = source($identity, $repo);
+my $bytecode-io = bytecode-io($identity, $repo);
+my $bytecode    = bytecode($identity, $repo);
+
+use Identity::Utils <short-name auth>;  # only import "short-name" and "auth"
 ```
 
 DESCRIPTION
@@ -54,6 +64,23 @@ DESCRIPTION
 Identity::Utils provides some utility functions for inspecting various aspects of distribution identity strings. They assume any given string is a well-formed identity in the form `name:ver<0.0.1>:auth<eco:nick>` with an optional `api:<1>` field.
 
 A general note with regards to `api`: if it consists of `"0"`, then it is assumed there is **no** api field specified.
+
+SELECTIVE IMPORTING
+===================
+
+```raku
+use Identity::Utils <short-name auth>;  # only import "short-name" and "auth"
+```
+
+By default all utility functions are exported. But you can limit this to the functions you actually need by specifying the names in the `use` statement.
+
+To prevent name collisions and/or import any subroutine with a more memorable name, one can use the "original-name:known-as" syntax. A semi-colon in a specified string indicates the name by which the subroutine is known in this distribution, followed by the name with which it will be known in the lexical context in which the `use` command is executed.
+
+```raku
+use Identity::Utils <short-name:name>;  # import "short-name" as "name"
+
+say name("Identity::Utils:auth<zef:lizmat>");  # Identity::Utils
+```
 
 SUBROUTINES
 ===========
@@ -107,6 +134,78 @@ Builds an identity string from the given short name and optional named arguments
 
   * nick - the nick part of "auth", unless overridden by "auth"
 
+bytecode
+--------
+
+```raku
+my $buf = bytecode($identity);       # default: $*REPO
+
+my $buf = bytecode($identity, ".");  # as if with -I.
+```
+
+Returns a `Buf` object with the precompiled bytecode of the given identity and the currently active repository ([`$*REPO`](https://docs.raku.org/language/compilation#$*REPO)).
+
+It is also possible to override the repository (chain) by specifying a second argument, this can be an object of type:
+
+  * `Str` - indicate a path for a ::FileSystem repo, just as with -I.
+
+  * `IO::Path` - indicate a path for a ::FileSystem repo
+
+  * `CompUnit::Repository` - the actual repo to use
+
+Returns `Nil` if the given identity could not be found, or there is no bytecode file for the short-name of the given identity (yet).
+
+bytecode-io
+-----------
+
+```raku
+my $io = bytecode-io($identity);       # default: $*REPO
+
+my $io = bytecode-io($identity, ".");  # as if with -I.
+```
+
+Returns an `IO::Path` object of the precompiled bytecode of the given identity and the currently active repository ([`$*REPO`](https://docs.raku.org/language/compilation#$*REPO)).
+
+It is also possible to override the repository (chain) by specifying a second argument, this can be an object of type:
+
+  * `Str` - indicate a path for a ::FileSystem repo, just as with -I.
+
+  * `IO::Path` - indicate a path for a ::FileSystem repo
+
+  * `CompUnit::Repository` - the actual repo to use
+
+Returns `Nil` if the given identity could not be found, or there is no bytecode file for the short-name of the given identity (yet).
+
+compunit
+--------
+
+```raku
+my $compunit = compunit($identity);       # default: $*REPO
+
+my $compunit = compunit($identity, ".");  # as if with -I.
+```
+
+Returns a [`Compunit`](https://docs.raku.org/type/CompUnit) object for the given identity and the currently active repository ([`$*REPO`](https://docs.raku.org/language/compilation#$*REPO)).
+
+It is also possible to override the repository (chain) by specifying a second argument, this can be an object of type:
+
+  * `Str` - indicate a path for a ::FileSystem repo, just as with -I.
+
+  * `IO::Path` - indicate a path for a ::FileSystem repo
+
+  * `CompUnit::Repository` - the actual repo to use
+
+Returns `Nil` if the given identity could not be found.
+
+dependency-specification
+------------------------
+
+```raku
+my $spec = dependency-specification($identity);
+```
+
+Creates a `CompUnit::DependencySpecification` object for the given identity.
+
 ecosystem
 ---------
 
@@ -149,6 +248,27 @@ say is-short-name("Foo::Bar");  # True
 
 Returns a boolean indicating whether the given identity consists of just a `short-name`.
 
+meta
+----
+
+```raku
+my $meta = meta($identity);       # default: $*REPO
+
+my $meta = meta($identity, ".");  # as if with -I.
+```
+
+Returns a hash with the meta information of the given identity and the currently active repository ([`$*REPO`](https://docs.raku.org/language/compilation#$*REPO)) as typically found in the `META6.json` file of a distribution.
+
+It is also possible to override the repository (chain) by specifying a second argument, this can be an object of type:
+
+  * `Str` - indicate a path for a ::FileSystem repo, just as with -I.
+
+  * `IO::Path` - indicate a path for a ::FileSystem repo
+
+  * `CompUnit::Repository` - the actual repo to use
+
+Returns `Nil` if the given identity could not be found.
+
 nick
 ----
 
@@ -178,6 +298,48 @@ say short-name($identity);  # Foo::Bar
 ```
 
 Returns the short name part of the given identity, or the identity itself if no `ver`, `auth` or `api` fields could be found.
+
+source
+------
+
+```raku
+say source($identity);       # default: $*REPO
+
+say source($identity, ".");  # as if with -I.
+```
+
+Returns the source-code of the given identity and the currently active repository ([`$*REPO`](https://docs.raku.org/language/compilation#$*REPO)) as typically found in the `lib` directory of a distribution.
+
+It is also possible to override the repository (chain) by specifying a second argument, this can be an object of type:
+
+  * `Str` - indicate a path for a ::FileSystem repo, just as with -I.
+
+  * `IO::Path` - indicate a path for a ::FileSystem repo
+
+  * `CompUnit::Repository` - the actual repo to use
+
+Returns `Nil` if the given identity could not be found, or there is no source-file for the short-name of the given identity.
+
+source-io
+---------
+
+```raku
+my $io = source-io($identity);       # default: $*REPO
+
+my $io = source-io($identity, ".");  # as if with -I.
+```
+
+Returns an `IO::Path` object of the source of the given identity and the currently active repository ([`$*REPO`](https://docs.raku.org/language/compilation#$*REPO)) as typically found in the `lib` directory of a distribution.
+
+It is also possible to override the repository (chain) by specifying a second argument, this can be an object of type:
+
+  * `Str` - indicate a path for a ::FileSystem repo, just as with -I.
+
+  * `IO::Path` - indicate a path for a ::FileSystem repo
+
+  * `CompUnit::Repository` - the actual repo to use
+
+Returns `Nil` if the given identity could not be found, or there is no source-file for the short-name of the given identity.
 
 ver
 ---

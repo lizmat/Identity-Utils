@@ -6,7 +6,7 @@
   "build-depends": [
   ],
   "depends": [
-    "String::Utils:ver<0.0.22+>:auth<zef:lizmat>"
+    "String::Utils:ver<0.0.32+>:auth<zef:lizmat>"
   ],
   "description": "Provide utility functions related to distribution identities",
   "license": "Artistic-2.0",
