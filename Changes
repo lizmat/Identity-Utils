@@ -1,6 +1,8 @@
 Revision history for Identity-Utils
 
 {{$NEXT}}
+
+0.0.12  2024-12-31T12:58:08+01:00
     - Add CI badge for each OS
     - Up dependency on String::Utils
     - Allow for selective importing of subs
