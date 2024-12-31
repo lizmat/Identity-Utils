@@ -1,6 +1,8 @@
 Revision history for Identity-Utils
 
 {{$NEXT}}
+
+0.0.13  2024-12-31T16:41:52+01:00
     - Fix tests so that they pass even if installed by
       name rather than from local install
 
