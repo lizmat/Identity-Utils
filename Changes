@@ -1,6 +1,8 @@
 Revision history for Identity-Utils
 
 {{$NEXT}}
+
+0.0.15  2024-12-31T21:03:50+01:00
     - Fix issue with source/bytecode-io during installation
     - Fix issue with source-io on CURI repos
 
