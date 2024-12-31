@@ -88,14 +88,17 @@ for <Perl6 Raku> {
 is-deeply is-pinned($sanitized),   True, 'is is-pinned (1) ok?';
 is-deeply is-pinned($short-name), False, 'is is-pinned (2) ok?';
 
-# This assumes -I. has been specified when running
 my $class := "Identity::Utils";
 my $dir   := $*PROGRAM.parent(2);
 my $path  := $dir.absolute;
 isa-ok compunit($class, $dir), CompUnit;
-is bytecode-io($class, $dir).parent(4).absolute, $path,
-  "is the bytecode IO correct?";
-isa-ok bytecode($class, $dir), Buf;
+isa-ok (my $io := bytecode-io($class, $dir)), IO::Path;
+if $io.e {
+    isa-ok bytecode($class, $dir), Buf;
+}
+else {
+    is $io.parent(4).absolute, $path, 'dir looks ok, but no bytecode yet';
+}
 
 my %meta := meta($class, $dir);
 %meta<ver version>:delete;  # too finicky

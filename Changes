@@ -2,6 +2,10 @@ Revision history for Identity-Utils
 
 {{$NEXT}}
 
+0.0.14  2024-12-31T16:53:42+01:00
+    - Alas, during staging the bytecode file doesn't appear
+      to be there yet, so skip that test then
+
 0.0.13  2024-12-31T16:41:52+01:00
     - Fix tests so that they pass even if installed by
       name rather than from local install
