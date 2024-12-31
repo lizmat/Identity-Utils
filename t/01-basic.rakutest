@@ -92,12 +92,12 @@ is-deeply is-pinned($short-name), False, 'is is-pinned (2) ok?';
 my $class := "Identity::Utils";
 my $dir   := $*PROGRAM.parent(2);
 my $path  := $dir.absolute;
-isa-ok compunit($class), CompUnit;
-is bytecode-io($class).parent(4).absolute, $path,
+isa-ok compunit($class, $dir), CompUnit;
+is bytecode-io($class, $dir).parent(4).absolute, $path,
   "is the bytecode IO correct?";
 isa-ok bytecode($class, $dir), Buf;
 
-my %meta := meta($class);
+my %meta := meta($class, $dir);
 %meta<ver version>:delete;  # too finicky
 is-deeply %meta, %(
  api          => "",
@@ -117,7 +117,7 @@ is-deeply %meta, %(
  test-depends => [],
 ), "is meta ok";
 
-is source-io($class).absolute,
+is source-io($class, $dir).absolute,
   $dir.add("lib/Identity/Utils.rakumod").absolute,
   "is the source IO correct?";
 isa-ok source($class, $dir), Str;
