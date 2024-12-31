@@ -1,7 +1,7 @@
 use Test;
 use Identity::Utils;
 
-plan 118;
+plan 120;
 
 my $short-name = "Foo::Bar";
 my $ver        = "0.0.42";
@@ -100,7 +100,7 @@ else {
     is $io.parent(4).absolute, $path, 'dir looks ok, but no bytecode yet';
 }
 
-my %meta := meta($class, $dir);
+my %meta = meta($class, $dir);
 %meta<ver version>:delete;  # too finicky
 is-deeply %meta, %(
  api          => "",
@@ -124,5 +124,9 @@ is source-io($class, $dir).absolute,
   $dir.add("lib/Identity/Utils.rakumod").absolute,
   "is the source IO correct?";
 isa-ok source($class, $dir), Str;
+
+ok source("Test").contains("unit module Test"), "Test source found";
+ok source("String::Utils").contains("my sub between"),
+  "String::Utils source found";
 
 # vim: expandtab shiftwidth=4

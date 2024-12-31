@@ -161,8 +161,23 @@ my sub meta(str $identity, $REPO?) {
 
 my sub source-io(str $identity, $REPO?) {
     with compunit($identity, $REPO) -> $compunit {
-        with $compunit.distribution.meta<provides> {
-            return $compunit.repo.prefix.add(.{short-name($identity)});
+        my $repo := $compunit.repo;
+
+        # Get rid of installation wrapping
+        $repo := $repo.repo
+          if $repo ~~ CompUnit::Repository::Distribution;
+
+        my $prefix       := $repo.prefix;
+        my $distribution := $compunit.distribution;
+        if $repo ~~ CompUnit::Repository::Installation {
+            with $distribution.meta<source> {
+                return $prefix.add("sources/$_");
+            }
+        }
+        elsif $repo ~~ CompUnit::Repository::FileSystem {
+            with $distribution.meta<provides> {
+                return $prefix.add(.{short-name($identity)});
+            }
         }
     }
     Nil
@@ -180,7 +195,12 @@ my sub source(str $identity, $REPO?) {
 my sub bytecode-io(str $identity, $REPO?) {
     with compunit($identity, $REPO) {
         my $repo := .repo;
-        my $io   := $repo.prefix;
+
+        # Get rid of installation wrapping
+        $repo := $repo.repo
+          if $repo ~~ CompUnit::Repository::Distribution;
+
+        my $io := $repo.prefix;
         if $repo ~~ CompUnit::Repository::Installation {
             $io := $io.add("precomp");
         }

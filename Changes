@@ -1,6 +1,8 @@
 Revision history for Identity-Utils
 
 {{$NEXT}}
+    - Fix issue with source/bytecode-io during installation
+    - Fix issue with source-io on CURI repos
 
 0.0.14  2024-12-31T16:53:42+01:00
     - Alas, during staging the bytecode file doesn't appear
