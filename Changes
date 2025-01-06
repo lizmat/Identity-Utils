@@ -2,6 +2,13 @@ Revision history for Identity-Utils
 
 {{$NEXT}}
 
+0.0.16  2025-01-06T16:17:01+01:00
+    - Make Str/IO::Path repo specification be exactly like -I.
+      instead of just creating a repo with that specification
+      and no repo chain.  This affects compunit, meta,
+      bytecode-io, bytecode, source-io and source
+    - Update copyright year
+
 0.0.15  2024-12-31T21:03:50+01:00
     - Fix issue with source/bytecode-io during installation
     - Fix issue with source-io on CURI repos

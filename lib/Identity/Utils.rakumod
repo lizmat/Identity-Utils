@@ -140,7 +140,10 @@ my sub dependency-specification(str $identity) {
 my sub compunit(str $identity, $REPO? is copy) {
     if $REPO.defined {
         if $REPO ~~ Str | IO::Path {
-            $REPO = CompUnit::Repository::FileSystem.new(:prefix($REPO));
+            $REPO = CompUnit::Repository::FileSystem.new(
+              :prefix($REPO),
+              :next-repo($*REPO)
+            );
         }
         elsif $REPO ~~ CompUnit::Repository {
             # already ok
