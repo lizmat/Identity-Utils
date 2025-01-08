@@ -153,7 +153,9 @@ It is also possible to override the repository (chain) by specifying a second ar
 
   * `CompUnit::Repository` - the actual repo to use
 
-Returns `Nil` if the given identity could not be found, or there is no bytecode file for the short-name of the given identity (yet).
+Attempts to create the bytecode file if there isn't one yet.
+
+Returns `Nil` if the given identity could not be found, or there is no bytecode file for the short-name of the given identity (probably because it failed to compile).
 
 bytecode-io
 -----------
@@ -174,15 +176,19 @@ It is also possible to override the repository (chain) by specifying a second ar
 
   * `CompUnit::Repository` - the actual repo to use
 
-Returns `Nil` if the given identity could not be found, or there is no bytecode file for the short-name of the given identity (yet).
+Attempts to create the bytecode file if there isn't one yet.
+
+Returns `Nil` if the given identity could not be found, or there is no bytecode file for the short-name of the given identity (probably because it failed to compile).
 
 compunit
 --------
 
 ```raku
-my $compunit = compunit($identity);       # default: $*REPO
+my $compunit = compunit($identity);         # default: $*REPO
 
-my $compunit = compunit($identity, ".");  # as if with -I.
+my $compunit = compunit($identity, ".");    # as if with -I.
+
+my $compunit = compunit($identity, :need);  # make bytecode
 ```
 
 Returns a [`Compunit`](https://docs.raku.org/type/CompUnit) object for the given identity and the currently active repository ([`$*REPO`](https://docs.raku.org/language/compilation#$*REPO)).
@@ -194,6 +200,8 @@ It is also possible to override the repository (chain) by specifying a second ar
   * `IO::Path` - indicate a path for a ::FileSystem repo
 
   * `CompUnit::Repository` - the actual repo to use
+
+A boolean named argument `need` can be specified to indicate that a bytecode file should be created if there is none for this compunit yet.
 
 Returns `Nil` if the given identity could not be found.
 

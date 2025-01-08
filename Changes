@@ -2,6 +2,11 @@ Revision history for Identity-Utils
 
 {{$NEXT}}
 
+0.0.17  2025-01-08T13:20:34+01:00
+    - Add :need named argument to "compunit"
+    - "bytecode-io" and "bytecode" will now attempt to
+      create a bytecode file if there isn't one yet
+
 0.0.16  2025-01-06T16:17:01+01:00
     - Make Str/IO::Path repo specification be exactly like -I.
       instead of just creating a repo with that specification
@@ -41,7 +46,8 @@ Revision history for Identity-Utils
     - Simplify the internal logic of "is-short-name"
 
 0.0.8  2022-02-06T18:26:52+01:00
-    - Make sure the without-xxx subs return target if not found
+    - Make sure the without-xxx subs return target if not
+      found
 
 0.0.7  2022-02-01T14:39:46+01:00
     - Make sure that "build" also ignores :from<Raku>
@@ -50,7 +56,8 @@ Revision history for Identity-Utils
 0.0.6  2022-01-25T20:06:15+01:00
     - Add "from" and "without-from"
     - Add general support for ":from<...>"
-    - Make all subs handle the case if using parentheses as well
+    - Make all subs handle the case if using parentheses
+      as well
     - Upped dependency of String::Utils
 
 0.0.5  2022-01-20T13:59:48+01:00

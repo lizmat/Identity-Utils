@@ -137,7 +137,7 @@ my sub dependency-specification(str $identity) {
        api-matcher  => api($identity)  // True
 }
 
-my sub compunit(str $identity, $REPO? is copy) {
+my sub compunit(str $identity, $REPO? is copy, :$need) {
     if $REPO.defined {
         if $REPO ~~ Str | IO::Path {
             $REPO = CompUnit::Repository::FileSystem.new(
@@ -155,7 +155,17 @@ my sub compunit(str $identity, $REPO? is copy) {
     else {
         $REPO = $*REPO;
     }
-    $REPO.resolve(dependency-specification($identity)) // Nil
+
+    my $spec := dependency-specification($identity);
+    with $REPO.resolve($spec) {
+        # Make sure a proper bytecode file is there if we need it
+        try $REPO.need($spec) if $need;
+
+        $_
+    }
+    else {
+        Nil
+    }
 }
 
 my sub meta(str $identity, $REPO?) {
@@ -196,7 +206,7 @@ my sub source(str $identity, $REPO?) {
 }
 
 my sub bytecode-io(str $identity, $REPO?) {
-    with compunit($identity, $REPO) {
+    with compunit($identity, $REPO, :need) {
         my $repo := .repo;
 
         # Get rid of installation wrapping

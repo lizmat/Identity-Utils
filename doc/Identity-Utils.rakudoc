@@ -166,8 +166,11 @@ a second argument, this can be an object of type:
 =item C<IO::Path> - indicate a path for a ::FileSystem repo
 =item C<CompUnit::Repository> - the actual repo to use
 
+Attempts to create the bytecode file if there isn't one yet.
+
 Returns C<Nil> if the given identity could not be found, or there
-is no bytecode file for the short-name of the given identity (yet).
+is no bytecode file for the short-name of the given identity
+(probably because it failed to compile).
 
 =head2 bytecode-io
 
@@ -189,16 +192,21 @@ a second argument, this can be an object of type:
 =item C<IO::Path> - indicate a path for a ::FileSystem repo
 =item C<CompUnit::Repository> - the actual repo to use
 
+Attempts to create the bytecode file if there isn't one yet.
+
 Returns C<Nil> if the given identity could not be found, or there
-is no bytecode file for the short-name of the given identity (yet).
+is no bytecode file for the short-name of the given identity
+(probably because it failed to compile).
 
 =head2 compunit
 
 =begin code :lang<raku>
 
-my $compunit = compunit($identity);       # default: $*REPO
+my $compunit = compunit($identity);         # default: $*REPO
 
-my $compunit = compunit($identity, ".");  # as if with -I.
+my $compunit = compunit($identity, ".");    # as if with -I.
+
+my $compunit = compunit($identity, :need);  # make bytecode
 
 =end code
 
@@ -211,6 +219,10 @@ a second argument, this can be an object of type:
 =item C<Str> - indicate a path for a ::FileSystem repo, just as with -I.
 =item C<IO::Path> - indicate a path for a ::FileSystem repo
 =item C<CompUnit::Repository> - the actual repo to use
+
+A boolean named argument C<need> can be specified to indicate that
+a bytecode file should be created if there is none for this compunit
+yet.
 
 Returns C<Nil> if the given identity could not be found.
 
