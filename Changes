@@ -1,6 +1,8 @@
 Revision history for Identity-Utils
 
 {{$NEXT}}
+    - Make sure that not all of String::Utils imported subs
+      are automatically exported with a blank -use- statement
 
 0.0.17  2025-01-08T13:20:34+01:00
     - Add :need named argument to "compunit"

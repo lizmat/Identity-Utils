@@ -1,4 +1,6 @@
-use String::Utils:ver<0.0.32+>:auth<zef:lizmat>;
+my constant @imports = <after before between between-included>;
+my constant %imports = @imports.map(* => True);
+use String::Utils:ver<0.0.32+>:auth<zef:lizmat> @imports;
 
 my sub extract(str $identity, str $needle) {
     if between $identity, $needle ~ '<', '>' -> str $string {
@@ -245,17 +247,21 @@ my sub EXPORT(*@names) {
     Map.new: @names
       ?? @names.map: {
              if UNIT::{"&$_"}:exists {
-                 UNIT::{"&$_"}:p
+                 UNIT::{"&$_"}:p unless %imports{$_}
              }
              else {
                  my ($in,$out) = .split(':', 2);
-                 if $out && UNIT::{"&$in"} -> &code {
+                 if $out
+                   && !%imports{$in}
+                   && UNIT::{"&$in"} -> &code {
                      Pair.new: "&$out", &code
                  }
              }
          }
       !! UNIT::.grep: {
-             .key.starts-with('&') && !(.key eq '&EXPORT')
+             .key.starts-with('&')
+               && !(.key eq '&EXPORT')
+               && !%imports{.key.substr(1)}
          }
 }
 

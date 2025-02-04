@@ -1,3 +1,5 @@
 .precomp/
 /Identity-Utils-*
 /releases/
+*.rakucov
+?
