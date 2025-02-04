@@ -1,6 +1,5 @@
-my constant @imports = <after before between between-included>;
-my constant %imports = @imports.map(* => True);
-use String::Utils:ver<0.0.32+>:auth<zef:lizmat> @imports;
+use String::Utils:ver<0.0.32+>:auth<zef:lizmat>
+  <after before between between-included>;
 
 my sub extract(str $identity, str $needle) {
     if between $identity, $needle ~ '<', '>' -> str $string {
@@ -244,24 +243,25 @@ my sub bytecode(str $identity, $REPO?) {
 }
 
 my sub EXPORT(*@names) {
+    my constant marker = "(Identity::Utils)";
     Map.new: @names
       ?? @names.map: {
-             if UNIT::{"&$_"}:exists {
-                 UNIT::{"&$_"}:p unless %imports{$_}
+             if UNIT::{"&$_"} -> &code {
+                 Pair.new("&$_", &code)
+                   if &code.file.ends-with(marker);
              }
              else {
                  my ($in,$out) = .split(':', 2);
-                 if $out
-                   && !%imports{$in}
-                   && UNIT::{"&$in"} -> &code {
-                     Pair.new: "&$out", &code
+                 if $out && UNIT::{"&$in"} -> &code {
+                     Pair.new("&$out", &code)
+                       if &code.file.ends-with(marker);
                  }
              }
          }
       !! UNIT::.grep: {
              .key.starts-with('&')
                && !(.key eq '&EXPORT')
-               && !%imports{.key.substr(1)}
+               && .value.file.ends-with(marker)
          }
 }
 

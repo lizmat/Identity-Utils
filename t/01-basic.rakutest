@@ -1,7 +1,21 @@
 use Test;
+
 use Identity::Utils;
 
-plan 120;
+plan 147;
+
+# Check all of the default exports
+isa-ok OUTER::MY::{"&$_"}, Sub, "&$_ was exported" for <
+  api auth build bytecode bytecode-io compunit dependency-specification
+  ecosystem from is-short-name is-pinned nick meta sanitize short-name
+  source source-io ver version without-api without-auth without-from
+  without-ver
+>;
+
+# Check String::Utils subs *not* being exported
+ok OUTER::MY::{"&$_"}:!exists, "&$_ has not been exported" for <
+  after before between between-included
+>;
 
 my $short-name = "Foo::Bar";
 my $ver        = "0.0.42";
