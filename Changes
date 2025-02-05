@@ -1,6 +1,7 @@
 Revision history for Identity-Utils
 
 {{$NEXT}}
+    - Add "latest-successors"
 
 0.0.18  2025-02-04T20:09:49+01:00
     - Make sure that not all of String::Utils imported subs

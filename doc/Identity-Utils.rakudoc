@@ -54,6 +54,8 @@ my $source      = source($identity, $repo);
 my $bytecode-io = bytecode-io($identity, $repo);
 my $bytecode    = bytecode($identity, $repo);
 
+.say for latest-successors(@identities);
+
 use Identity::Utils <short-name auth>;  # only import "short-name" and "auth"
 
 =end code
@@ -271,9 +273,9 @@ say is-pinned("Foo::Bar");  # False
 
 =end code
 
-Returns a boolean indicating whether the given identity is considered to
-be pinned to a specific release.  This implies: having an C<auth> and having
-a version B<without> a C<+> or a C<*> in it.
+Returns a boolean indicating whether the given identity is considered
+to be pinned to a specific release.  This implies: having an C<auth>
+and having a version B<without> a C<+> or a C<*> in it.
 
 =head2 is-short-name
 
@@ -285,8 +287,31 @@ say is-short-name("Foo::Bar");  # True
 
 =end code
 
-Returns a boolean indicating whether the given identity consists of just a
-C<short-name>.
+Returns a boolean indicating whether the given identity consists of
+just a C<short-name>.
+
+=head2 latest-successors
+
+=begin code :lang<raku>
+
+.say for latest-successors(@identies);
+
+=end code
+
+Returns a sorted C<Seq> of identities that have been filtered by
+the same semantics that are used when installing a module without
+specifying anything other than a short name of an identity.
+
+For instance, taking:
+
+=begin output
+AccountableBagHash:ver<0.0.3>:auth<cpan:ELIZABETH>
+AccountableBagHash:ver<0.0.6>:auth<zef:lizmat>
+=end output
+
+would only return C<AccountableBagHash:ver<0.0.6>:auth<zef:lizmat>>
+because it has a higher version number, and the ecosystems are
+different.
 
 =head2 meta
 

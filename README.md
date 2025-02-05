@@ -55,6 +55,8 @@ my $source      = source($identity, $repo);
 my $bytecode-io = bytecode-io($identity, $repo);
 my $bytecode    = bytecode($identity, $repo);
 
+.say for latest-successors(@identities);
+
 use Identity::Utils <short-name auth>;  # only import "short-name" and "auth"
 ```
 
@@ -255,6 +257,22 @@ say is-short-name("Foo::Bar");  # True
 ```
 
 Returns a boolean indicating whether the given identity consists of just a `short-name`.
+
+latest-successors
+-----------------
+
+```raku
+.say for latest-successors(@identies);
+```
+
+Returns a sorted `Seq` of identities that have been filtered by the same semantics that are used when installing a module without specifying anything other than a short name of an identity.
+
+For instance, taking:
+
+    AccountableBagHash:ver<0.0.3>:auth<cpan:ELIZABETH>
+    AccountableBagHash:ver<0.0.6>:auth<zef:lizmat>
+
+would only return `AccountableBagHash:ver<0.0.6>:auth<zef:lizmat>` because it has a higher version number, and the ecosystems are different.
 
 meta
 ----

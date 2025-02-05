@@ -2,14 +2,14 @@ use Test;
 
 use Identity::Utils;
 
-plan 147;
+plan 149;
 
 # Check all of the default exports
 isa-ok OUTER::MY::{"&$_"}, Sub, "&$_ was exported" for <
   api auth build bytecode bytecode-io compunit dependency-specification
-  ecosystem from is-short-name is-pinned nick meta sanitize short-name
-  source source-io ver version without-api without-auth without-from
-  without-ver
+  ecosystem from is-short-name is-pinned latest-successors meta nick
+  sanitize short-name source source-io ver version
+  without-api without-auth without-from without-ver
 >;
 
 # Check String::Utils subs *not* being exported
@@ -142,5 +142,14 @@ isa-ok source($class, $dir), Str;
 ok source("Test").contains("unit module Test"), "Test source found";
 ok source("String::Utils").contains("my sub between"),
   "String::Utils source found";
+
+my @identities = q:to/IDENTITIES/.lines;
+AccountableBagHash:ver<0.0.3>:auth<cpan:ELIZABETH>
+AccountableBagHash:ver<0.0.6>:auth<zef:lizmat>
+Acme::Addslashes:ver<0.1.2>:auth<github:xfix>
+IDENTITIES
+
+is-deeply latest-successors(@identities), @identities.skip,
+  'did we get the correct successors';
 
 # vim: expandtab shiftwidth=4
