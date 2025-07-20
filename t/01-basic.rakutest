@@ -2,7 +2,7 @@ use Test;
 
 use Identity::Utils;
 
-plan 149;
+plan 156;
 
 # Check all of the default exports
 isa-ok OUTER::MY::{"&$_"}, Sub, "&$_ was exported" for <
@@ -27,7 +27,10 @@ my $api        = "2.0";
 my $from       = "Perl5";
 my $sanitized  = $short-name ~ ":ver<$ver>:auth<$auth>:api<$api>:from<$from>";
 
-is build($short-name, :$ver, :$auth, :$api, :$from), $sanitized, 'is build ok?';
+is build($short-name, :$ver, :$auth, :$api, :$from), $sanitized,
+  'is build ok with :auth?';
+is build($short-name, :$ver, :$nick, :$api, :$from), $sanitized,
+  'is build ok with :nick?';
 
 for
     (":ver<$ver>",   ":auth<$auth>",   ":api<$api>",   ":from<$from>"),
@@ -105,13 +108,16 @@ is-deeply is-pinned($short-name), False, 'is is-pinned (2) ok?';
 my $class := "Identity::Utils";
 my $dir   := $*PROGRAM.parent(2);
 my $path  := $dir.absolute;
-isa-ok compunit($class, $dir), CompUnit;
-isa-ok (my $io := bytecode-io($class, $dir)), IO::Path;
-if $io.e {
-    isa-ok bytecode($class, $dir), Buf;
-}
-else {
-    is $io.parent(4).absolute, $path, 'dir looks ok, but no bytecode yet';
+
+for $dir, $*REPO -> $repo {
+    isa-ok compunit($class, $repo), CompUnit;
+    isa-ok (my $io := bytecode-io($class, $repo)), IO::Path;
+    if $io.e {
+        isa-ok bytecode($class, $repo), Buf;
+    }
+    else {
+        is $io.parent(4).absolute, $path, 'dir looks ok, but no bytecode yet';
+    }
 }
 
 my %meta = meta($class, $dir);
@@ -151,5 +157,14 @@ IDENTITIES
 
 is-deeply latest-successors(@identities), @identities.skip,
   'did we get the correct successors';
+
+ok is-pinned(build meta("String::Utils")),
+  'can we build from meta, and does it produce a good identity';
+
+{
+    use Identity::Utils <ecosystem nick:NICK>;  # test partial imports
+    is ecosystem($sanitized), $ecosystem, 'did imported ecosystem work';
+    is NICK($sanitized), $nick,           'did imported nick work';
+}
 
 # vim: expandtab shiftwidth=4

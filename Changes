@@ -1,6 +1,9 @@
 Revision history for Identity-Utils
 
 {{$NEXT}}
+    - Add "build" candidate that takes a hash (from a
+      META6.json file)
+    - Added more tests for complete coverage
 
 0.0.19  2025-02-05T18:36:38+01:00
     - Add "latest-successors"

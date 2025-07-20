@@ -1,5 +1,5 @@
 use String::Utils:ver<0.0.32+>:auth<zef:lizmat>
-  <after before between between-included>;
+  <after before between between-included>;  # UNCOVERABLE
 
 my sub extract(str $identity, str $needle) {
     if between $identity, $needle ~ '<', '>' -> str $string {
@@ -39,7 +39,15 @@ my sub short-name(str $identity) {
     }
 }
 
-my sub build(str $short-name,
+my proto sub build(|) {*}
+my multi sub build(%meta) {
+    my %args;
+    %args<auth> := $_ with %meta<auth>;
+    %args<api>  := $_ with %meta<api>;
+    %args<ver>  := $_ with %meta<version>;
+    build %meta<name>, |%args
+}
+my multi sub build(Str:D $short-name,
   :$ver, :$auth, :$api, :$ecosystem = "zef", :$nick, :$from
 ) {
     my str @parts = $short-name;
@@ -146,7 +154,7 @@ my sub compunit(str $identity, $REPO? is copy, :$need) {
               :next-repo($*REPO)
             );
         }
-        elsif $REPO ~~ CompUnit::Repository {
+        elsif $REPO ~~ CompUnit::Repository {  # UNCOVERABLE
             # already ok
         }
         else {
@@ -188,7 +196,7 @@ my sub source-io(str $identity, $REPO?) {
                 return $prefix.add("sources/$_");
             }
         }
-        elsif $repo ~~ CompUnit::Repository::FileSystem {
+        elsif $repo ~~ CompUnit::Repository::FileSystem {  # UNCOVERABLE
             with $distribution.meta<provides> {
                 return $prefix.add(.{short-name($identity)});
             }
@@ -218,7 +226,7 @@ my sub bytecode-io(str $identity, $REPO?) {
         if $repo ~~ CompUnit::Repository::Installation {
             $io := $io.add("precomp");
         }
-        elsif $repo ~~ CompUnit::Repository::FileSystem {
+        elsif $repo ~~ CompUnit::Repository::FileSystem {  # UNCOVERABLE
             $io := $io.add(".precomp");
         }
         else {

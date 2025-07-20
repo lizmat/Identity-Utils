@@ -41,6 +41,9 @@ say sanitize($identity);     # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>:fr
 
 say build("Foo::Bar", :ver<0.0.42>);  # Foo::Bar:ver<0.0.42>
 
+# build from a hash of a JSON file
+say build(from-json("META6.json".io.slurp);
+
 say is-short-name($identity);   # False
 say is-short-name("Foo::Bar");  # True
 
@@ -135,6 +138,13 @@ Builds an identity string from the given short name and optional named arguments
   * ecosystem - the ecosystem part of "auth", defaults to "zef"
 
   * nick - the nick part of "auth", unless overridden by "auth"
+
+```raku
+# build from a hash of a JSON file
+say build(from-json("META6.json".io.slurp);
+```
+
+Alternately, an identity string can be built from an `Associative` such as being created from a `META6.json` file.
 
 bytecode
 --------
