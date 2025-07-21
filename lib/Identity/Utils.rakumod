@@ -270,6 +270,10 @@ my sub latest-successors(@identities) {
     }
 }
 
+my sub rakuland(str $id) {
+    "https://raku.land/&auth($id)/&short-name($id)?v=&ver($id)"
+}
+
 my sub EXPORT(*@names) {
     my constant marker = "(Identity::Utils)";
     Map.new: @names

@@ -61,6 +61,8 @@ my $bytecode    = bytecode($identity, $repo);
 .say for latest-successors(@identities);
 
 use Identity::Utils <short-name auth>;  # only import "short-name" and "auth"
+
+say rakuland($identity);  # https://raku.land/...
 ```
 
 DESCRIPTION
@@ -314,6 +316,16 @@ say nick($identity); # lizmat
 ```
 
 Returns the nickname part of the `auth` field of the given identity, or `Nil` if no `auth` field could be found.
+
+rakuland
+--------
+
+```raku
+my $identity = "Foo::Bar:auth<zef:lizmat>:ver<0.0.42>:api<2.0>";
+say rakuland($identity);  # https://raku.land/zef:lizmat/FOO::Bar?v=0.0.42
+```
+
+Returns the [raku.land](https://raku.land) URL of the given identity.
 
 sanitize
 --------

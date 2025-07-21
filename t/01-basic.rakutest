@@ -2,7 +2,7 @@ use Test;
 
 use Identity::Utils;
 
-plan 156;
+plan 157;
 
 # Check all of the default exports
 isa-ok OUTER::MY::{"&$_"}, Sub, "&$_ was exported" for <
@@ -166,5 +166,9 @@ ok is-pinned(build meta("String::Utils")),
     is ecosystem($sanitized), $ecosystem, 'did imported ecosystem work';
     is NICK($sanitized), $nick,           'did imported nick work';
 }
+
+is rakuland($sanitized),
+  "https://raku.land/zef:lizmat/Foo::Bar?v=0.0.42",
+  'Is the raku.land link correct';
 
 # vim: expandtab shiftwidth=4

@@ -2,6 +2,9 @@ Revision history for Identity-Utils
 
 {{$NEXT}}
 
+0.0.21  2025-07-21T20:32:01+02:00
+    - Add "rakuland"
+
 0.0.20  2025-07-20T22:11:01+02:00
     - Add "build" candidate that takes a hash (from a
       META6.json file)
