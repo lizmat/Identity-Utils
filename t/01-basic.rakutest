@@ -127,7 +127,7 @@ is-deeply %meta, %(
  auth         => "zef:lizmat",
  authors      => ["Elizabeth Mattijsen"],
  build-depends => [],
- depends      => ["String::Utils:ver<0.0.32+>:auth<zef:lizmat>"],
+ depends      => ["String::Utils:ver<0.0.33+>:auth<zef:lizmat>"],
  description  => "Provide utility functions related to distribution identities",
  files        => %(),
  license      => "Artistic-2.0",
