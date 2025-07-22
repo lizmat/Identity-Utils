@@ -1,4 +1,4 @@
-use String::Utils:ver<0.0.32+>:auth<zef:lizmat>
+use String::Utils:ver<0.0.33+>:auth<zef:lizmat>
   <after before between between-included>;  # UNCOVERABLE
 
 my sub extract(str $identity, str $needle) {

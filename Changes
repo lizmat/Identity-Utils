@@ -1,6 +1,7 @@
 Revision history for Identity-Utils
 
 {{$NEXT}}
+    - Up dependency on String::Utils, because we can
 
 0.0.21  2025-07-21T20:32:01+02:00
     - Add "rakuland"
