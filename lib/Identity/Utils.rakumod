@@ -230,7 +230,7 @@ my sub nick(str $identity) {
     }
 }
 
-#- raku-land -------------------------------------------------------------------
+#- raku-land-url ---------------------------------------------------------------
 my sub raku-land-url(str $id) {
     "https://raku.land/&auth($id)/&short-name($id)?v=&ver($id)"
 }
