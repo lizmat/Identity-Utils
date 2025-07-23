@@ -1,6 +1,7 @@
-use String::Utils:ver<0.0.33+>:auth<zef:lizmat>
+use String::Utils:ver<0.0.34+>:auth<zef:lizmat>
   <after before between between-included>;  # UNCOVERABLE
 
+#- helper subs -----------------------------------------------------------------
 my sub extract(str $identity, str $needle) {
     if between $identity, $needle ~ '<', '>' -> str $string {
         $string
@@ -12,33 +13,18 @@ my sub extract(str $identity, str $needle) {
         Nil
     }
 }
-my sub remove(str $identity, str $needle) {
-    if between-included($identity, $needle ~ '<', '>')
-      // between-included($identity, $needle ~ '(', ')') -> str $string {
-        $identity.subst($string)
-    }
-    else {
-        $identity
-    }
+
+#- api -------------------------------------------------------------------------
+my sub api(str $identity) {
+    extract $identity, ':api'
 }
 
-my sub short-name(str $identity) {
-    with $identity.rindex('::') -> int $offset {
-        with $identity.index(':', $offset + 2) -> int $chars {
-            $identity.substr(0, $chars)
-        }
-        else {
-            $identity
-        }
-    }
-    orwith $identity.index(':') -> int $chars {
-        $identity.substr(0, $chars)
-    }
-    else {
-        $identity
-    }
+#- auth ------------------------------------------------------------------------
+my sub auth(str $identity) {
+    extract $identity, ':auth'
 }
 
+#- build -----------------------------------------------------------------------
 my proto sub build(|) {*}
 my multi sub build(%meta) {
     my %args;
@@ -62,90 +48,49 @@ my multi sub build(Str:D $short-name,
     @parts.push("from<$from>") if $from && $from ne "Perl6" | "Raku";
     @parts.join(":")
 }
-
-my sub ver(str $identity) {
-    extract $identity, ':ver'
-}
-my sub without-ver(str $identity) {
-    remove $identity, ':ver'
+my multi build(Any:U $_) {
+    build .^name, :ver(.^ver), :auth(.^auth), :api(.^api)
 }
 
-my sub version(str $identity) {
-    (.Version with extract $identity, ':ver') // Nil
-}
-
-my sub auth(str $identity) {
-    extract $identity, ':auth'
-}
-my sub without-auth(str $identity) {
-    remove $identity, ':auth'
-}
-
-my sub ecosystem(str $identity) {
-    with auth($identity) -> $auth {
-        before $auth, ':'
+#- bytecode --------------------------------------------------------------------
+my sub bytecode(str $identity, $REPO?) {
+    with bytecode-io($identity, $REPO) {
+        .e ?? .slurp(:bin) !! Nil
     }
     else {
         Nil
     }
 }
 
-my sub nick(str $identity) {
-    with auth($identity) -> $auth {
-        after $auth, ':'
+#- bytecode-io -----------------------------------------------------------------
+my sub bytecode-io(str $identity, $REPO?) {
+    with compunit($identity, $REPO, :need) {
+        my $repo := .repo;
+
+        # Get rid of installation wrapping
+        $repo := $repo.repo
+          if $repo ~~ CompUnit::Repository::Distribution;
+
+        my $io := $repo.prefix;
+        if $repo ~~ CompUnit::Repository::Installation {
+            $io := $io.add("precomp");
+        }
+        elsif $repo ~~ CompUnit::Repository::FileSystem {  # UNCOVERABLE
+            $io := $io.add(".precomp");
+        }
+        else {
+            return Nil;
+        }
+
+        my $repo-id := .repo-id;
+        $io.add(Compiler.id).add($repo-id.substr(0,2)).add($repo-id)
     }
     else {
         Nil
     }
 }
 
-my sub api(str $identity) {
-    extract $identity, ':api'
-}
-my sub without-api(str $identity) {
-    remove $identity, ':api'
-}
-
-my sub from(str $identity) {
-    extract $identity, ':from'
-}
-my sub without-from(str $identity) {
-    remove $identity, ':from'
-}
-
-my sub sanitize(str $identity) {
-    my str @parts = short-name($identity);
-    @parts.push("ver<$_>")  with ver($identity);
-    @parts.push("auth<$_>") with auth($identity);
-    if api($identity) -> $api {
-        @parts.push("api<$api>") if $api ne "0";
-    }
-    if from($identity) -> $from {
-        @parts.push("from<$from>")
-          unless $from eq 'Raku' | 'Perl6';
-    }
-    @parts.join(":")
-}
-
-my sub is-short-name(str $identity) {
-    short-name($identity) eq $identity
-}
-
-my sub is-pinned(str $identity) {
-    so auth($identity)
-      && (my $version := version $identity)
-      && !$version.plus
-      && !$version.whatever
-}
-
-my sub dependency-specification(str $identity) {
-     CompUnit::DependencySpecification.new:
-       short-name   => short-name($identity),
-       auth-matcher => auth($identity) // True,
-       ver-matcher  => ver($identity)  // True,
-       api-matcher  => api($identity)  // True
-}
-
+#- compunit --------------------------------------------------------------------
 my sub compunit(str $identity, $REPO? is copy, :$need) {
     if $REPO.defined {
         if $REPO ~~ Str | IO::Path {
@@ -177,10 +122,193 @@ my sub compunit(str $identity, $REPO? is copy, :$need) {
     }
 }
 
-my sub meta(str $identity, $REPO?) {
-    compunit($identity, $REPO) andthen .distribution.meta
+#- dependencies-from-depends ---------------------------------------------------
+my sub dependencies-from-depends($depends) {
+    if $depends ~~ Positional {
+        $depends.grep({ $_ ~~ Str })
+    }
+    elsif $depends ~~ Associative {
+        if $depends<runtime><requires> -> $requires {
+            $requires.map: {
+                $_ ~~ Associative
+                  ?? build .<name> // '',
+                       :ver(.<ver>), :auth(.<auth>),
+                       :api(.<api>), :from(.<from>)
+                  !! $_
+            } if $requires ~~ Positional
+        }
+    }
+    elsif $depends ~~ Str {
+        $depends
+    }
 }
 
+#- dependencies-from-identity --------------------------------------------------
+my sub dependencies-from-identity(str $identity, $REPO?) {
+    with meta($identity, $REPO) -> %meta {
+        dependencies-from-depends($_) with %meta.<depends>
+    }
+}
+
+#- dependency-specification ----------------------------------------------------
+my sub dependency-specification(str $identity) {
+     CompUnit::DependencySpecification.new:
+       short-name   => short-name($identity),
+       auth-matcher => auth($identity) // True,
+       ver-matcher  => ver($identity)  // True,
+       api-matcher  => api($identity)  // True
+}
+
+#- ecosystem -------------------------------------------------------------------
+my sub ecosystem(str $identity) {
+    with auth($identity) -> $auth {
+        before $auth, ':'
+    }
+    else {
+        Nil
+    }
+}
+
+#- from ------------------------------------------------------------------------
+my sub from(str $identity) {
+    extract $identity, ':from'
+}
+
+#- is-pinned -------------------------------------------------------------------
+my sub is-pinned(str $identity) {
+    so auth($identity)
+      && (my $version := version $identity)
+      && !$version.plus
+      && !$version.whatever
+}
+
+#- is-short-name ---------------------------------------------------------------
+my sub is-short-name(str $identity) {
+    short-name($identity) eq $identity
+}
+
+#- latest-successors -----------------------------------------------------------
+my sub latest-successors(@identities) {
+    my %by-short-name;
+    %by-short-name{short-name $_}{auth $_} = $_ for @identities;
+
+    %by-short-name.sort(*.key).map: {
+        my %by-auth := .value;
+
+        # Only the one, we're done
+        if %by-auth == 1 {
+            %by-auth.values.head
+        }
+
+        else {
+            my %by-eco;
+            %by-eco{before .key, ":"}.push(.value) for %by-auth;
+            (%by-eco<zef> // %by-eco<cpan> // %by-eco<github>).Slip
+        }
+    }
+}
+
+#- meta ------------------------------------------------------------------------
+my sub meta(str $identity, $REPO?) {
+    with compunit($identity, $REPO) {
+        my $d := .distribution;
+        $d.meta<foo>; # dummy lookup to vivify full meta hash
+        $d.meta
+    }
+    else {
+        Nil
+    }
+}
+
+#- nick ------------------------------------------------------------------------
+my sub nick(str $identity) {
+    with auth($identity) -> $auth {
+        after $auth, ':'
+    }
+    else {
+        Nil
+    }
+}
+
+#- raku-land -------------------------------------------------------------------
+my sub raku-land-url(str $id) {
+    "https://raku.land/&auth($id)/&short-name($id)?v=&ver($id)"
+}
+
+#-rea-dist ---------------------------------------------------------------------
+my sub rea-dist(str $id, IO() $io = ".", str $extension = 'tar.gz') {
+    my $proc := run
+      'curl',
+      '--location',
+      '--output', ($io.d ?? $io.add("$id.$extension") !! $io),
+      rea-dist-url($id, $extension),
+      :out, :err
+    ;
+    !$proc.exitcode
+}
+
+#-rea-dist-url -----------------------------------------------------------------
+my sub rea-dist-url(str $id, str $extension = 'tar.gz') {
+    ( "https://github.com/Raku/REA/raw/refs/heads/main/archive",
+      $id.substr(0,1), short-name($id), $id
+    ).join("/") ~ ".$extension"
+}
+
+#- remove ----------------------------------------------------------------------
+my sub remove(str $identity, str $needle) {
+    if between-included($identity, $needle ~ '<', '>')
+      // between-included($identity, $needle ~ '(', ')') -> str $string {
+        $identity.subst($string)
+    }
+    else {
+        $identity
+    }
+}
+
+#- sanitize --------------------------------------------------------------------
+my sub sanitize(str $identity) {
+    my str @parts = short-name($identity);
+    @parts.push("ver<$_>")  with ver($identity);
+    @parts.push("auth<$_>") with auth($identity);
+    if api($identity) -> $api {
+        @parts.push("api<$api>") if $api ne "0";
+    }
+    if from($identity) -> $from {
+        @parts.push("from<$from>")
+          unless $from eq 'Raku' | 'Perl6';
+    }
+    @parts.join(":")
+}
+
+#- short-name ------------------------------------------------------------------
+my sub short-name(str $identity) {
+    with $identity.rindex('::') -> int $offset {
+        with $identity.index(':', $offset + 2) -> int $chars {
+            $identity.substr(0, $chars)
+        }
+        else {
+            $identity
+        }
+    }
+    orwith $identity.index(':') -> int $chars {
+        $identity.substr(0, $chars)
+    }
+    else {
+        $identity
+    }
+}
+
+#- source ----------------------------------------------------------------------
+my sub source(str $identity, $REPO?) {
+    with source-io($identity, $REPO) {
+        .e ?? .slurp !! Nil
+    }
+    else {
+        Nil
+    }
+}
+
+#- source-io -------------------------------------------------------------------
 my sub source-io(str $identity, $REPO?) {
     with compunit($identity, $REPO) -> $compunit {
         my $repo := $compunit.repo;
@@ -205,75 +333,37 @@ my sub source-io(str $identity, $REPO?) {
     Nil
 }
 
-my sub source(str $identity, $REPO?) {
-    with source-io($identity, $REPO) {
-        .e ?? .slurp !! Nil
-    }
-    else {
-        Nil
-    }
+#- ver -------------------------------------------------------------------------
+my sub ver(str $identity) {
+    extract $identity, ':ver'
 }
 
-my sub bytecode-io(str $identity, $REPO?) {
-    with compunit($identity, $REPO, :need) {
-        my $repo := .repo;
-
-        # Get rid of installation wrapping
-        $repo := $repo.repo
-          if $repo ~~ CompUnit::Repository::Distribution;
-
-        my $io := $repo.prefix;
-        if $repo ~~ CompUnit::Repository::Installation {
-            $io := $io.add("precomp");
-        }
-        elsif $repo ~~ CompUnit::Repository::FileSystem {  # UNCOVERABLE
-            $io := $io.add(".precomp");
-        }
-        else {
-            return Nil;
-        }
-
-        my $repo-id := .repo-id;
-        $io.add(Compiler.id).add($repo-id.substr(0,2)).add($repo-id)
-    }
-    else {
-        Nil
-    }
+#- version ---------------------------------------------------------------------
+my sub version(str $identity) {
+    (.Version with extract $identity, ':ver') // Nil
 }
 
-my sub bytecode(str $identity, $REPO?) {
-    with bytecode-io($identity, $REPO) {
-        .e ?? .slurp(:bin) !! Nil
-    }
-    else {
-        Nil
-    }
+#- without-api -----------------------------------------------------------------
+my sub without-api(str $identity) {
+    remove $identity, ':api'
 }
 
-my sub latest-successors(@identities) {
-    my %by-short-name;
-    %by-short-name{short-name $_}{auth $_} = $_ for @identities;
-
-    %by-short-name.sort(*.key).map: {
-        my %by-auth := .value;
-
-        # Only the one, we're done
-        if %by-auth == 1 {
-            %by-auth.values.head
-        }
-
-        else {
-            my %by-eco;
-            %by-eco{before .key, ":"}.push(.value) for %by-auth;
-            (%by-eco<zef> // %by-eco<cpan> // %by-eco<github>).Slip
-        }
-    }
+#- without-auth ----------------------------------------------------------------
+my sub without-auth(str $identity) {
+    remove $identity, ':auth'
 }
 
-my sub rakuland(str $id) {
-    "https://raku.land/&auth($id)/&short-name($id)?v=&ver($id)"
+#- without-from ----------------------------------------------------------------
+my sub without-from(str $identity) {
+    remove $identity, ':from'
 }
 
+#- without-ver -----------------------------------------------------------------
+my sub without-ver(str $identity) {
+    remove $identity, ':ver'
+}
+
+#- EXPORT ----------------------------------------------------------------------
 my sub EXPORT(*@names) {
     my constant marker = "(Identity::Utils)";
     Map.new: @names
@@ -292,9 +382,13 @@ my sub EXPORT(*@names) {
          }
       !! UNIT::.grep: {
              .key.starts-with('&')
-               && !(.key eq '&EXPORT')
+               && !(.key eq '&EXPORT' | '&extract')
                && .value.file.ends-with(marker)
          }
 }
+
+#- hack ------------------------------------------------------------------------
+# To allow version / auth / api fetching
+module Identity::Utils:ver<0.0.21>:auth<zef:lizmat> { }
 
 # vim: expandtab shiftwidth=4

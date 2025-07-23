@@ -58,9 +58,13 @@ my $bytecode    = bytecode($identity, $repo);
 
 .say for latest-successors(@identities);
 
-use Identity::Utils <short-name auth>;  # only import "short-name" and "auth"
+say raku-land-url($identity);  # https://raku.land/...
+say rea-dist-url($identity);   # https://github.com/Raku/REA/...
 
-say rakuland($identity);  # https://raku.land/...
+say "Download of $identity distribution successfull"
+  if rea-dist($identity);
+
+use Identity::Utils <short-name auth>;  # only import "short-name" and "auth"
 =end code
 
 =head1 DESCRIPTION
@@ -142,12 +146,19 @@ arguments:
 =item nick - the nick part of "auth", unless overridden by "auth"
 
 =begin code :lang<raku>
+use String::Utils;
+say build(String::Utils);  # String::Utils:ver<0.0.34>:auth<zef:lizmat>
+=end code
+
+An identity string can also be built from a type object.
+
+=begin code :lang<raku>
 # build from a hash of a JSON file
 say build(from-json("META6.json".io.slurp);
 =end code
 
 Alternately, an identity string can be built from an C<Associative> such
-as being created from a `META6.json` file.
+as being created from a C<META6.json> file.
 
 =head2 bytecode
 
@@ -222,6 +233,41 @@ a bytecode file should be created if there is none for this compunit
 yet.
 
 Returns C<Nil> if the given identity could not be found.
+
+=head2 dependencies-from-depends
+
+=begin code :lang<raku>
+my %meta := from-json "META6.json".IO.slurp;
+with %meta<depends> -> $depends {
+    .say for dependencies-from-depends($depends);
+}
+=end code
+
+Returns an iterable that produces all of the dependencies of the
+given "depends" value, as usually found in the META6.json file
+of a distribution.  Although this is generally just a list of
+strings for most distributions, it B<can> contain more structured
+information (which is also handled by this logic).
+
+=head2 dependencies-from-identity
+
+=begin code :lang<raku>
+.say for dependencies-from-identity($identity);       # default: $*REPO
+
+.say for dependencies-from-identity($identity, ".");  # as if with -I.
+=end code
+
+Returns an iterable that produces all of the dependencies of the
+given identity.
+
+It is also possible to override the repository (chain) by specifying
+a second argument, this can be an object of type:
+=item C<Str> - indicate a path for a ::FileSystem repo, just as with -I.
+=item C<IO::Path> - indicate a path for a ::FileSystem repo
+=item C<CompUnit::Repository> - the actual repo to use
+
+Returns C<Empty> if either the given identity could not be found, or
+there are no dependencies.
 
 =head2 dependency-specification
 
@@ -327,11 +373,143 @@ say nick($identity); # lizmat
 Returns the nickname part of the C<auth> field of the given identity, or
 C<Nil> if no C<auth> field could be found.
 
-=head2 rakuland
+=head2 raku-land-url
 
 =begin code :lang<raku>
 my $identity = "Foo::Bar:auth<zef:lizmat>:ver<0.0.42>:api<2.0>";
-say rakuland($identity);  # https://raku.land/zef:lizmat/FOO::Bar?v=0.0.42
+say raku-land-url($identity);  # https://raku.land/zef:lizmat/FOO::Bar?v=0.0.42
+=end code
+
+Returns the L<raku.land|https://raku.land> URL of the given identity.
+
+=head2 rea-dist
+
+=begin code :lang<raku>
+my $identity = "Foo::Bar:auth<zef:lizmat>:ver<0.0.42>";
+say "Download of $identity distribution successful"
+  if rea-dist-url($identity);
+=end code
+
+Attempts to download the distribution tar file of the given identity
+from the L<Raku Ecosystem Archive (REA)|https://github.com/Raku/REA>
+and returns C<True> if this was successful.
+
+Allows specifying a second argument that is either a path or an
+C<IO::Path> object to indicate where the download should be stored:
+it defaults to "." indicating the current directory.
+
+If the path indicates a directory, then the distribution will be
+stored in that directory with the identity's long name.  Otherwise
+the path will be taken as the name to store the distribution as.
+
+Assumes the C<curl> command-line program is installed.
+
+=head2 rea-dist-url
+
+=begin code :lang<raku>
+my $identity = "Foo::Bar:auth<zef:lizmat>:ver<0.0.42>";
+say rea-dist-url($identity);
+# https://github.com/Raku/REA/raw/refs/heads/main/archive/F/Foo::Bar/Foo::Bar:ver<0.0.42>:auth<zef:lizmat>.tar.gz
+=end code
+
+Returns the URL of the distribution of the given identity in the
+L<Raku Ecosystem Archive (REA)|https://github.com/Raku/REA>.
+
+=head2 sanitize
+
+=begin code :lang<raku>
+my $identity = "Foo::Bar:auth<zef:lizmat>:ver<0.0.42>:api<2.0>";
+say sanitize($identity);  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>
+=end code
+
+Returns a version of the given identity in which any C<ver>, C<auth> and
+C<api> fields are put in the correct order.
+
+=head2 short-name
+
+=begin code :lang<raku>
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+say short-name($identity);  # Foo::Bar
+=end code
+
+Returns the short name part of the given identity, or the identity itself
+if no C<ver>, C<auth> or C<api> fields could be found.
+
+=head2 source
+
+=begin code :lang<raku>
+say source($identity);       # default: $*REPO
+
+say source($identity, ".");  # as if with -I.
+=end code
+
+Returns the source-code of the given identity and the currently
+active repository
+(L<C<$*REPO>|https://docs.raku.org/language/compilation#$*REPO>) as
+typically found in the C<lib> directory of a distribution.
+
+It is also possible to override the repository (chain) by specifying
+a second argument, this can be an object of type:
+=item C<Str> - indicate a path for a ::FileSystem repo, just as with -I.
+=item C<IO::Path> - indicate a path for a ::FileSystem repo
+=item C<CompUnit::Repository> - the actual repo to use
+
+Returns C<Nil> if the given identity could not be found, or there
+is no source-file for the short-name of the given identity.
+
+=head2 source-io
+
+=begin code :lang<raku>
+my $io = source-io($identity);       # default: $*REPO
+
+my $io = source-io($identity, ".");  # as if with -I.
+=end code
+
+Returns an C<IO::Path> object of the source of the given identity
+and the currently active repository
+(L<C<$*REPO>|https://docs.raku.org/language/compilation#$*REPO>) as
+typically found in the C<lib> directory of a distribution.
+
+It is also possible to override the repository (chain) by specifying
+a second argument, this can be an object of type:
+=item C<Str> - indicate a path for a ::FileSystem repo, just as with -I.
+=item C<IO::Path> - indicate a path for a ::FileSystem repo
+=item C<CompUnit::Repository> - the actual repo to use
+
+Returns C<Nil> if the given identity could not be found, or there
+is no source-file for the short-name of the given identity.
+
+=head2 ver
+
+=begin code :lang<raku>
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+say ver($identity);  # 0.0.42
+=end code
+
+Returns the C<ver> field of the given identity as a C<Str>, or C<Nil> if no
+C<ver> field could be found.
+
+=head2 version
+
+=begin code :lang<raku>
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+say version($identity);  # v0.0.42
+=end code
+
+Returns the C<ver> field of the given identity as a C<Version> object, or
+C<Nil> if no C<ver> field could be found.
+
+=head2 without-api
+
+=begin code :lang<raku>
+my $identity = "Foo::Bar:ver<0.0.42>:auth<zef:lizmat>:api<2.0>";
+say without-api($identity);  # Foo::Bar:ver<0.0.42>:auth<zef:lizmat>
+
+=head2 raku-land-url
+
+=begin code :lang<raku>
+my $identity = "Foo::Bar:auth<zef:lizmat>:ver<0.0.42>:api<2.0>";
+say raku-land-url($identity);  # https://raku.land/zef:lizmat/FOO::Bar?v=0.0.42
 =end code
 
 Returns the L<raku.land|https://raku.land> URL of the given identity.

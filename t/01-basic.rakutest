@@ -2,13 +2,16 @@ use Test;
 
 use Identity::Utils;
 
-plan 157;
+my constant $dependency = "String::Utils:ver<0.0.34+>:auth<zef:lizmat>";
+
+plan 166;
 
 # Check all of the default exports
 isa-ok OUTER::MY::{"&$_"}, Sub, "&$_ was exported" for <
-  api auth build bytecode bytecode-io compunit dependency-specification
-  ecosystem from is-short-name is-pinned latest-successors meta nick
-  sanitize short-name source source-io ver version
+  api auth build bytecode bytecode-io compunit dependencies-from-depends
+  dependencies-from-identity dependency-specification ecosystem from
+  is-short-name is-pinned latest-successors meta nick raku-land-url
+  rea-dist rea-dist-url sanitize short-name source source-io ver version
   without-api without-auth without-from without-ver
 >;
 
@@ -127,7 +130,7 @@ is-deeply %meta, %(
  auth         => "zef:lizmat",
  authors      => ["Elizabeth Mattijsen"],
  build-depends => [],
- depends      => ["String::Utils:ver<0.0.33+>:auth<zef:lizmat>"],
+ depends      => [$dependency],
  description  => "Provide utility functions related to distribution identities",
  files        => %(),
  license      => "Artistic-2.0",
@@ -139,6 +142,10 @@ is-deeply %meta, %(
  tags         => [<DISTRIBUTION META IDENTITY ECOSYSTEM>],
  test-depends => [],
 ), "is meta ok";
+
+is-deeply dependencies-from-depends(%meta<depends>),
+  ($dependency,),
+  'can we get dependencies from depends info';
 
 is source-io($class, $dir).absolute,
   $dir.add("lib/Identity/Utils.rakumod").absolute,
@@ -167,8 +174,18 @@ ok is-pinned(build meta("String::Utils")),
     is NICK($sanitized), $nick,           'did imported nick work';
 }
 
-is rakuland($sanitized),
+is raku-land-url($sanitized),
   "https://raku.land/zef:lizmat/Foo::Bar?v=0.0.42",
   'Is the raku.land link correct';
+
+my $identity := build(Identity::Utils);
+ok is-pinned($identity), 'is the Identity::Utils class pinned';
+is-deeply dependencies-from-identity($identity),
+  ($dependency,),
+  'can we get dependencies from identity';
+
+is rea-dist-url($identity),
+  "https://github.com/Raku/REA/raw/refs/heads/main/archive/I/Identity::Utils/Identity::Utils:ver<0.0.21>:auth<zef:lizmat>.tar.gz",
+  'Is the download URL correct';
 
 # vim: expandtab shiftwidth=4
