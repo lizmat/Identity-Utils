@@ -4,15 +4,16 @@ use Identity::Utils;
 
 my constant $dependency = "String::Utils:ver<0.0.34+>:auth<zef:lizmat>";
 
-plan 166;
+plan 171;
 
 # Check all of the default exports
 isa-ok OUTER::MY::{"&$_"}, Sub, "&$_ was exported" for <
   api auth build bytecode bytecode-io compunit dependencies-from-depends
   dependencies-from-identity dependency-specification ecosystem from
   is-short-name is-pinned latest-successors meta nick raku-land-url
-  rea-dist rea-dist-url sanitize short-name source source-io ver version
-  without-api without-auth without-from without-ver
+  rea-dist rea-dist-url rea-meta rea-meta-url sanitize short-name
+  source source-io ver version without-api without-auth without-from
+  without-ver
 >;
 
 # Check String::Utils subs *not* being exported
@@ -147,6 +148,16 @@ is-deeply dependencies-from-depends(%meta<depends>),
   ($dependency,),
   'can we get dependencies from depends info';
 
+is-deeply
+  dependencies-from-depends({ runtime => { requires => [$dependency] } }),
+  ($dependency,),
+  'can we get dependencies from Associative depends info';
+
+is-deeply
+  dependencies-from-depends($dependency),
+  ($dependency,),
+  'can we get dependencies from Str depends info';
+
 is source-io($class, $dir).absolute,
   $dir.add("lib/Identity/Utils.rakumod").absolute,
   "is the source IO correct?";
@@ -186,6 +197,10 @@ is-deeply dependencies-from-identity($identity),
 
 is rea-dist-url($identity),
   "https://github.com/Raku/REA/raw/refs/heads/main/archive/I/Identity::Utils/Identity::Utils:ver<0.0.21>:auth<zef:lizmat>.tar.gz",
-  'Is the download URL correct';
+  'Is the distribution URL correct';
+
+is rea-meta-url($identity),
+  "https://raw.githubusercontent.com/Raku/REA/refs/heads/main/meta/I/Identity::Utils/Identity::Utils:ver<0.0.21>:auth<zef:lizmat>.json",
+  'Is the meta URL correct';
 
 # vim: expandtab shiftwidth=4

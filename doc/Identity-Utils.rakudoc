@@ -59,10 +59,12 @@ my $bytecode    = bytecode($identity, $repo);
 .say for latest-successors(@identities);
 
 say raku-land-url($identity);  # https://raku.land/...
+say rea-meta-url($identity);   # https://raw.githubusercontent.com...
 say rea-dist-url($identity);   # https://github.com/Raku/REA/...
 
 say "Download of $identity distribution successfull"
   if rea-dist($identity);
+say rea-meta($identity);  # {"api":"","auth":"zef:lizmat","authors"...
 
 use Identity::Utils <short-name auth>;  # only import "short-name" and "auth"
 =end code
@@ -387,7 +389,7 @@ Returns the L<raku.land|https://raku.land> URL of the given identity.
 =begin code :lang<raku>
 my $identity = "Foo::Bar:auth<zef:lizmat>:ver<0.0.42>";
 say "Download of $identity distribution successful"
-  if rea-dist-url($identity);
+  if rea-dist($identity);
 =end code
 
 Attempts to download the distribution tar file of the given identity
@@ -404,6 +406,10 @@ the path will be taken as the name to store the distribution as.
 
 Assumes the C<curl> command-line program is installed.
 
+Optionally takes a C<:verbose> named argument: if specified with
+a truish value, will show any error information on STDERR if the
+download failed for some reason.
+
 =head2 rea-dist-url
 
 =begin code :lang<raku>
@@ -413,6 +419,34 @@ say rea-dist-url($identity);
 =end code
 
 Returns the URL of the distribution of the given identity in the
+L<Raku Ecosystem Archive (REA)|https://github.com/Raku/REA>.
+
+=head2 rea-meta
+
+=begin code :lang<raku>
+my $identity = "Foo::Bar:auth<zef:lizmat>:ver<0.0.42>";
+say rea-meta($identity);  # {"api":"","auth":"zef:lizmat","authors"...
+=end code
+
+Attempts to download the meta information file of the given identity
+from the L<Raku Ecosystem Archive (REA)|https://github.com/Raku/REA>
+and returns that if successful.  Otherwise returns C<Nil>.
+
+Assumes the C<curl> command-line program is installed.
+
+Optionally takes a C<:verbose> named argument: if specified with
+a truish value, will show any error information on STDERR if the
+download failed for some reason.
+
+=head2 rea-meta-url
+
+=begin code :lang<raku>
+my $identity = "Foo::Bar:auth<zef:lizmat>:ver<0.0.42>";
+say rea-meta-url($identity);
+# https://raw.githubusercontent.com/Raku/REA/refs/heads/main/meta/F/Foo::Bar/Foo::Bar:ver<0.0.42>:auth<zef:lizmat>.json
+=end code
+
+Returns the URL of the meta information of the given identity in the
 L<Raku Ecosystem Archive (REA)|https://github.com/Raku/REA>.
 
 =head2 sanitize

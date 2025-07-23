@@ -138,8 +138,8 @@ my sub dependencies-from-depends($depends) {
             } if $requires ~~ Positional
         }
     }
-    elsif $depends ~~ Str {
-        $depends
+    elsif $depends ~~ Str {  # UNCOVERABLE
+        ($depends,)
     }
 }
 
@@ -236,15 +236,26 @@ my sub raku-land-url(str $id) {
 }
 
 #-rea-dist ---------------------------------------------------------------------
-my sub rea-dist(str $id, IO() $io = ".", str $extension = 'tar.gz') {
+my sub rea-dist(
+  str  $id,
+  IO() $io = ".",
+  str  $extension = 'tar.gz',
+      :$verbose
+) {
+    my $output := $io.d ?? $io.add("$id.$extension") !! $io;
+
     my $proc := run
-      'curl',
-      '--location',
-      '--output', ($io.d ?? $io.add("$id.$extension") !! $io),
+      'curl', '--location', '--fail', '--output', $output,
       rea-dist-url($id, $extension),
       :out, :err
     ;
-    !$proc.exitcode
+    if $proc.exitcode {
+        put $proc.err.slurp if $verbose;
+        False
+    }
+    else {
+        True
+    }
 }
 
 #-rea-dist-url -----------------------------------------------------------------
@@ -252,6 +263,25 @@ my sub rea-dist-url(str $id, str $extension = 'tar.gz') {
     ( "https://github.com/Raku/REA/raw/refs/heads/main/archive",
       $id.substr(0,1), short-name($id), $id
     ).join("/") ~ ".$extension"
+}
+
+#-rea-meta ---------------------------------------------------------------------
+my sub rea-meta(str $id, :$verbose) {
+    my $proc := run 'curl', '--fail', rea-meta-url($id), :out, :err ;
+    if $proc.exitcode {
+        $*ERR.put: $proc.err.slurp if $verbose;
+        Nil
+    }
+    else {
+        $proc.out.slurp
+    }
+}
+
+#-rea-meta-url -----------------------------------------------------------------
+my sub rea-meta-url(str $id) {
+    ( "https://raw.githubusercontent.com/Raku/REA/refs/heads/main/meta",
+      $id.substr(0,1), short-name($id), $id
+    ).join("/") ~ ".json"
 }
 
 #- remove ----------------------------------------------------------------------

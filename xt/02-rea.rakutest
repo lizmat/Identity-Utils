@@ -1,0 +1,24 @@
+use Test;
+
+use Identity::Utils;
+
+my $identity   := "String::Utils:ver<0.0.34>:auth<zef:lizmat>";
+my $downloaded := $*PROGRAM.sibling("downloaded.tar.gz");
+
+plan 6;
+
+is rea-meta($identity), Q:to/JSON/.chomp, 'did we get the meta info';
+{"api":"","auth":"zef:lizmat","authors":["Elizabeth Mattijsen"],"build-depends":[],"depends":[],"description":"Provide some optimized string functions","dist":"String::Utils:ver<0.0.34>:auth<zef:lizmat>","license":"Artistic-2.0","name":"String::Utils","perl":"6.d","provides":{"String::Utils":"lib/String/Utils.rakumod"},"release-date":"2025-07-23","resources":[],"source-url":"https://raw.githubusercontent.com/raku/REA/main/archive/S/String%3A%3AUtils/String%3A%3AUtils%3Aver%3C0.0.34%3E%3Aauth%3Czef%3Alizmat%3E.tar.gz","tags":["STRING","UTIL","CHOMP","SHA1","STEM","NGRAM","NAUGHTY","WORD","MARKS"],"test-depends":[],"version":"0.0.34"}
+JSON
+
+is-deeply rea-meta($identity.chop), Nil, 'did we get a failure';
+
+ok rea-dist($identity, $downloaded), 'could we download the dist?';
+ok $downloaded.e, 'did the file arrive';
+is $downloaded.s, 18235, 'did it have the right size';
+
+nok rea-dist($identity.chop, $downloaded), 'did it fail?';
+
+END $downloaded.unlink;  # cleanup
+
+# vim: expandtab shiftwidth=4

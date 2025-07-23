@@ -61,10 +61,12 @@ my $bytecode    = bytecode($identity, $repo);
 .say for latest-successors(@identities);
 
 say raku-land-url($identity);  # https://raku.land/...
+say rea-meta-url($identity);   # https://raw.githubusercontent.com...
 say rea-dist-url($identity);   # https://github.com/Raku/REA/...
 
 say "Download of $identity distribution successfull"
   if rea-dist($identity);
+say rea-meta($identity);  # {"api":"","auth":"zef:lizmat","authors"...
 
 use Identity::Utils <short-name auth>;  # only import "short-name" and "auth"
 ```
@@ -377,7 +379,7 @@ rea-dist
 ```raku
 my $identity = "Foo::Bar:auth<zef:lizmat>:ver<0.0.42>";
 say "Download of $identity distribution successful"
-  if rea-dist-url($identity);
+  if rea-dist($identity);
 ```
 
 Attempts to download the distribution tar file of the given identity from the [Raku Ecosystem Archive (REA)](https://github.com/Raku/REA) and returns `True` if this was successful.
@@ -387,6 +389,8 @@ Allows specifying a second argument that is either a path or an `IO::Path` objec
 If the path indicates a directory, then the distribution will be stored in that directory with the identity's long name. Otherwise the path will be taken as the name to store the distribution as.
 
 Assumes the `curl` command-line program is installed.
+
+Optionally takes a `:verbose` named argument: if specified with a truish value, will show any error information on STDERR if the download failed for some reason.
 
 rea-dist-url
 ------------
@@ -398,6 +402,31 @@ say rea-dist-url($identity);
 ```
 
 Returns the URL of the distribution of the given identity in the [Raku Ecosystem Archive (REA)](https://github.com/Raku/REA).
+
+rea-meta
+--------
+
+```raku
+my $identity = "Foo::Bar:auth<zef:lizmat>:ver<0.0.42>";
+say rea-meta($identity);  # {"api":"","auth":"zef:lizmat","authors"...
+```
+
+Attempts to download the meta information file of the given identity from the [Raku Ecosystem Archive (REA)](https://github.com/Raku/REA) and returns that if successful. Otherwise returns `Nil`.
+
+Assumes the `curl` command-line program is installed.
+
+Optionally takes a `:verbose` named argument: if specified with a truish value, will show any error information on STDERR if the download failed for some reason.
+
+rea-meta-url
+------------
+
+```raku
+my $identity = "Foo::Bar:auth<zef:lizmat>:ver<0.0.42>";
+say rea-meta-url($identity);
+# https://raw.githubusercontent.com/Raku/REA/refs/heads/main/meta/F/Foo::Bar/Foo::Bar:ver<0.0.42>:auth<zef:lizmat>.json
+```
+
+Returns the URL of the meta information of the given identity in the [Raku Ecosystem Archive (REA)](https://github.com/Raku/REA).
 
 sanitize
 --------
