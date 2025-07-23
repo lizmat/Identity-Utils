@@ -1,6 +1,8 @@
 Revision history for Identity-Utils
 
 {{$NEXT}}
+
+0.0.22  2025-07-23T19:59:18+02:00
     - Up dependency on String::Utils, because we can
     - Add "rea-meta-url" and "rea-meta"
     - Add "rea-dist-url" and "rea-dist"

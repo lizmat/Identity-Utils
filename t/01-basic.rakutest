@@ -1,5 +1,4 @@
 use Test;
-
 use Identity::Utils;
 
 my constant $dependency = "String::Utils:ver<0.0.34+>:auth<zef:lizmat>";
@@ -196,11 +195,11 @@ is-deeply dependencies-from-identity($identity),
   'can we get dependencies from identity';
 
 is rea-dist-url($identity),
-  "https://github.com/Raku/REA/raw/refs/heads/main/archive/I/Identity::Utils/Identity::Utils:ver<0.0.21>:auth<zef:lizmat>.tar.gz",
+  "https://github.com/Raku/REA/raw/refs/heads/main/archive/I/Identity::Utils/Identity::Utils:ver<{Identity::Utils.^ver}>:auth<zef:lizmat>.tar.gz",
   'Is the distribution URL correct';
 
 is rea-meta-url($identity),
-  "https://raw.githubusercontent.com/Raku/REA/refs/heads/main/meta/I/Identity::Utils/Identity::Utils:ver<0.0.21>:auth<zef:lizmat>.json",
+  "https://raw.githubusercontent.com/Raku/REA/refs/heads/main/meta/I/Identity::Utils/Identity::Utils:ver<{Identity::Utils.^ver}>:auth<zef:lizmat>.json",
   'Is the meta URL correct';
 
 # vim: expandtab shiftwidth=4
