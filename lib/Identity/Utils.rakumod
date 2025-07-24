@@ -32,7 +32,7 @@ my multi sub build(%meta) {
     %args<auth> := $_ with %meta<auth>;
     with %meta<api>  {
         if .Str -> $api {
-            %args<api> := $api;
+            %args<api> := $api;  # UNCOVERABLE
         }
     }
     build %meta<name>, |%args
@@ -423,6 +423,6 @@ my sub EXPORT(*@names) {
 
 #- hack ------------------------------------------------------------------------
 # To allow version / auth / api fetching
-module Identity::Utils:ver<0.0.22>:auth<zef:lizmat> { }
+module Identity::Utils:ver<0.0.23>:auth<zef:lizmat> { }
 
 # vim: expandtab shiftwidth=4

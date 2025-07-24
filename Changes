@@ -1,6 +1,8 @@
 Revision history for Identity-Utils
 
 {{$NEXT}}
+
+0.0.23  2025-07-24T23:42:37+02:00
     - Make sure empty "api" values (e.g. caused by an
       empty Version) are ignored in "build"
 
