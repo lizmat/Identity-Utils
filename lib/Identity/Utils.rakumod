@@ -28,9 +28,13 @@ my sub auth(str $identity) {
 my proto sub build(|) {*}
 my multi sub build(%meta) {
     my %args;
-    %args<auth> := $_ with %meta<auth>;
-    %args<api>  := $_ with %meta<api>;
     %args<ver>  := $_ with %meta<version>;
+    %args<auth> := $_ with %meta<auth>;
+    with %meta<api>  {
+        if .Str -> $api {
+            %args<api> := $api;
+        }
+    }
     build %meta<name>, |%args
 }
 my multi sub build(Str:D $short-name,

@@ -1,6 +1,8 @@
 Revision history for Identity-Utils
 
 {{$NEXT}}
+    - Make sure empty "api" values (e.g. caused by an
+      empty Version) are ignored in "build"
 
 0.0.22  2025-07-23T19:59:18+02:00
     - Up dependency on String::Utils, because we can
