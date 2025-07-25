@@ -1,6 +1,10 @@
 Revision history for Identity-Utils
 
 {{$NEXT}}
+    - Add "rea-index-url" and "rea-index"
+    - Add "zef-index-url" and "zef-index"
+    - Up dependency on String::Utils to get "text-from-url"
+    - Add import testing
 
 0.0.23  2025-07-24T23:42:37+02:00
     - Make sure empty "api" values (e.g. caused by an
@@ -12,7 +16,7 @@ Revision history for Identity-Utils
     - Add "rea-dist-url" and "rea-dist"
     - Add "dependencies-from-depends"
     - Add "dependencies-from-identity"
-    - Rename "rakuland" to "raku-land" to make TLD more visible
+    - Rename "rakuland" to "raku-land-url" to make TLD more visible
     - Make "meta" return fully populated META information
     - Allow "build" to take a type object
 

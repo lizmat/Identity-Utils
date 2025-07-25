@@ -1,0 +1,34 @@
+use Test;
+
+my constant @subs = <
+  api auth build bytecode bytecode-io compunit dependency-specification
+  ecosystem from is-pinned is-short-name latest-successors meta nick
+  raku-land-url rea-dist rea-dist-url rea-index rea-index-url rea-meta
+  rea-meta-url sanitize short-name source source-io ver version
+  without-api without-auth without-from without-ver zef-index
+  zef-index-url
+>;
+
+plan @subs + 2;
+
+my $code;
+for @subs {
+    $code ~= qq:!c:to/CODE/;
+    {
+        use Identity::Utils '$_';
+        ok MY::<&$_>:exists, "Did '$_' get exported?";
+    }
+    CODE
+}
+
+$code ~= qq:!c:to/CODE/;
+{
+    use Identity::Utils <bytecode-io:bio>;
+    ok MY::<&bio>:exists, "Did 'bio' get exported?";
+    is MY::<&bio>.name, 'bytecode-io', 'Was the original name "bytecode-io"?';
+}
+CODE
+
+$code.EVAL;
+
+# vim: expandtab shiftwidth=4

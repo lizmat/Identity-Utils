@@ -64,9 +64,15 @@ say raku-land-url($identity);  # https://raku.land/...
 say rea-meta-url($identity);   # https://raw.githubusercontent.com...
 say rea-dist-url($identity);   # https://github.com/Raku/REA/...
 
-say "Download of $identity distribution successfull"
+say "Download of $identity distribution successful"
   if rea-dist($identity);
 say rea-meta($identity);  # {"api":"","auth":"zef:lizmat","authors"...
+
+say rea-index-url;  # https://raw.githubusercontent.com/Raku...
+my $rea-json = rea-index;
+
+say zef-index-url;  # https://360.zef.pm
+my $zef-json = zef-index;
 
 use Identity::Utils <short-name auth>;  # only import "short-name" and "auth"
 ```
@@ -388,7 +394,7 @@ Allows specifying a second argument that is either a path or an `IO::Path` objec
 
 If the path indicates a directory, then the distribution will be stored in that directory with the identity's long name. Otherwise the path will be taken as the name to store the distribution as.
 
-Assumes the `curl` command-line program is installed.
+Assumes the `curl` command-line program is installed and a network connection is available.
 
 Optionally takes a `:verbose` named argument: if specified with a truish value, will show any error information on STDERR if the download failed for some reason.
 
@@ -403,6 +409,27 @@ say rea-dist-url($identity);
 
 Returns the URL of the distribution of the given identity in the [Raku Ecosystem Archive (REA)](https://github.com/Raku/REA).
 
+rea-index
+---------
+
+```raku
+my $json = rea-index;
+```
+
+Returns the JSON of the REA (Raku Ecosystem Archive) index.
+
+Assumes the `curl` command-line program is installed and a network connection is available.
+
+rea-index-url
+-------------
+
+```raku
+say rea-index-url;
+# https://raw.githubusercontent.com/Raku/REA/refs/heads/main/META.json
+```
+
+Returns the URL of the JSON-index of the REA (Raku Ecosystem Archive).
+
 rea-meta
 --------
 
@@ -413,7 +440,7 @@ say rea-meta($identity);  # {"api":"","auth":"zef:lizmat","authors"...
 
 Attempts to download the meta information file of the given identity from the [Raku Ecosystem Archive (REA)](https://github.com/Raku/REA) and returns that if successful. Otherwise returns `Nil`.
 
-Assumes the `curl` command-line program is installed.
+Assumes the `curl` command-line program is installed and a network connection is available.
 
 Optionally takes a `:verbose` named argument: if specified with a truish value, will show any error information on STDERR if the download failed for some reason.
 
@@ -647,6 +674,26 @@ say without-ver($identity);  # Foo::Bar:auth<zef:lizmat>:api<2.0>
 ```
 
 Returns the identity **without** any `ver` field of the given identity.
+
+zef-index
+---------
+
+```raku
+my $json = zef-index;
+```
+
+Returns the JSON of the zef index.
+
+Assumes the `curl` command-line program is installed and a network connection is available.
+
+zef-index-url
+-------------
+
+```raku
+say zef-index-url;  # https://360.zef.pm
+```
+
+Returns the URL of the JSON-index of the zef ecosystem.
 
 AUTHOR
 ======

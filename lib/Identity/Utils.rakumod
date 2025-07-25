@@ -1,7 +1,8 @@
-use String::Utils:ver<0.0.34+>:auth<zef:lizmat>
-  <after before between between-included>;  # UNCOVERABLE
+use String::Utils:ver<0.0.35+>:auth<zef:lizmat>
+  <after before between between-included text-from-url>;  # UNCOVERABLE
 
 #- helper subs -----------------------------------------------------------------
+# Extract the text between a given foo< >
 my sub extract(str $identity, str $needle) {
     if between $identity, $needle ~ '<', '>' -> str $string {
         $string
@@ -269,16 +270,17 @@ my sub rea-dist-url(str $id, str $extension = 'tar.gz') {
     ).join("/") ~ ".$extension"
 }
 
+#-rea-index---------------------------------------------------------------------
+my sub rea-index(:$verbose) { text-from-url rea-index-url, :$verbose }
+
+#- rea-index-url ---------------------------------------------------------------
+my sub rea-index-url() {
+    "https://raw.githubusercontent.com/Raku/REA/refs/heads/main/META.json"  # UNCOVERABLE
+}
+
 #-rea-meta ---------------------------------------------------------------------
 my sub rea-meta(str $id, :$verbose) {
-    my $proc := run 'curl', '--fail', rea-meta-url($id), :out, :err ;
-    if $proc.exitcode {
-        $*ERR.put: $proc.err.slurp if $verbose;
-        Nil
-    }
-    else {
-        $proc.out.slurp
-    }
+    text-from-url rea-meta-url($id), :verbose
 }
 
 #-rea-meta-url -----------------------------------------------------------------
@@ -395,6 +397,14 @@ my sub without-from(str $identity) {
 #- without-ver -----------------------------------------------------------------
 my sub without-ver(str $identity) {
     remove $identity, ':ver'
+}
+
+#-zef-index---------------------------------------------------------------------
+my sub zef-index(:$verbose) { text-from-url zef-index-url, :$verbose }
+
+#- zef-index-url ---------------------------------------------------------------
+my sub zef-index-url() {
+    'https://360.zef.pm'  # UNCOVERABLE
 }
 
 #- EXPORT ----------------------------------------------------------------------

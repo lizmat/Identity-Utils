@@ -62,9 +62,15 @@ say raku-land-url($identity);  # https://raku.land/...
 say rea-meta-url($identity);   # https://raw.githubusercontent.com...
 say rea-dist-url($identity);   # https://github.com/Raku/REA/...
 
-say "Download of $identity distribution successfull"
+say "Download of $identity distribution successful"
   if rea-dist($identity);
 say rea-meta($identity);  # {"api":"","auth":"zef:lizmat","authors"...
+
+say rea-index-url;  # https://raw.githubusercontent.com/Raku...
+my $rea-json = rea-index;
+
+say zef-index-url;  # https://360.zef.pm
+my $zef-json = zef-index;
 
 use Identity::Utils <short-name auth>;  # only import "short-name" and "auth"
 =end code
@@ -404,7 +410,8 @@ If the path indicates a directory, then the distribution will be
 stored in that directory with the identity's long name.  Otherwise
 the path will be taken as the name to store the distribution as.
 
-Assumes the C<curl> command-line program is installed.
+Assumes the C<curl> command-line program is installed and a network
+connection is available.
 
 Optionally takes a C<:verbose> named argument: if specified with
 a truish value, will show any error information on STDERR if the
@@ -421,6 +428,26 @@ say rea-dist-url($identity);
 Returns the URL of the distribution of the given identity in the
 L<Raku Ecosystem Archive (REA)|https://github.com/Raku/REA>.
 
+=head2 rea-index
+
+=begin code :lang<raku>
+my $json = rea-index;
+=end code
+
+Returns the JSON of the REA (Raku Ecosystem Archive) index.
+
+Assumes the C<curl> command-line program is installed and a network
+connection is available.
+
+=head2 rea-index-url
+
+=begin code :lang<raku>
+say rea-index-url;
+# https://raw.githubusercontent.com/Raku/REA/refs/heads/main/META.json
+=end code
+
+Returns the URL of the JSON-index of the REA (Raku Ecosystem Archive).
+
 =head2 rea-meta
 
 =begin code :lang<raku>
@@ -432,7 +459,8 @@ Attempts to download the meta information file of the given identity
 from the L<Raku Ecosystem Archive (REA)|https://github.com/Raku/REA>
 and returns that if successful.  Otherwise returns C<Nil>.
 
-Assumes the C<curl> command-line program is installed.
+Assumes the C<curl> command-line program is installed and a network
+connection is available.
 
 Optionally takes a C<:verbose> named argument: if specified with
 a truish value, will show any error information on STDERR if the
@@ -667,6 +695,25 @@ say without-ver($identity);  # Foo::Bar:auth<zef:lizmat>:api<2.0>
 =end code
 
 Returns the identity B<without> any C<ver> field of the given identity.
+
+=head2 zef-index
+
+=begin code :lang<raku>
+my $json = zef-index;
+=end code
+
+Returns the JSON of the zef index.
+
+Assumes the C<curl> command-line program is installed and a network
+connection is available.
+
+=head2 zef-index-url
+
+=begin code :lang<raku>
+say zef-index-url;  # https://360.zef.pm
+=end code
+
+Returns the URL of the JSON-index of the zef ecosystem.
 
 =head1 AUTHOR
 
