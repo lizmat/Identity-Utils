@@ -1,6 +1,8 @@
 Revision history for Identity-Utils
 
 {{$NEXT}}
+
+0.0.24  2025-07-25T12:29:01+02:00
     - Add "rea-index-url" and "rea-index"
     - Add "zef-index-url" and "zef-index"
     - Up dependency on String::Utils to get "text-from-url"

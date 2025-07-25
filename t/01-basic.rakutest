@@ -1,7 +1,7 @@
 use Test;
 use Identity::Utils;
 
-my constant $dependency = "String::Utils:ver<0.0.34+>:auth<zef:lizmat>";
+my constant $dependency = "String::Utils:ver<0.0.35+>:auth<zef:lizmat>";
 
 plan 171;
 
