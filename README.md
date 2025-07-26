@@ -280,6 +280,16 @@ my $spec = dependency-specification($identity);
 
 Creates a `CompUnit::DependencySpecification` object for the given identity.
 
+distribution-name
+-----------------
+
+```raku
+say distribution-name("SBOM::CycloneDX:ver<0.0.9>:auth<zef:lizmat>");
+# SBOM-CycloneDX-0.0.9.tar.gz
+```
+
+Return the distribution name for the given pinned identity. Optionally takes a second positional argument for the extension to be used: defaults to "tar.gz".
+
 ecosystem
 ---------
 

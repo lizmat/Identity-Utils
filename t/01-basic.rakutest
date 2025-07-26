@@ -3,7 +3,7 @@ use Identity::Utils;
 
 my constant $dependency = "String::Utils:ver<0.0.35+>:auth<zef:lizmat>";
 
-plan 171;
+plan 172;
 
 # Check all of the default exports
 isa-ok OUTER::MY::{"&$_"}, Sub, "&$_ was exported" for <
@@ -201,5 +201,9 @@ is rea-dist-url($identity),
 is rea-meta-url($identity),
   "https://raw.githubusercontent.com/Raku/REA/refs/heads/main/meta/I/Identity::Utils/Identity::Utils:ver<{Identity::Utils.^ver}>:auth<zef:lizmat>.json",
   'Is the meta URL correct';
+
+is distribution-name("SBOM::CycloneDX:ver<0.0.9>:auth<zef:lizmat>"),
+  'SBOM-CycloneDX-0.0.9.tar.gz',
+  'is the distribution name correct';
 
 # vim: expandtab shiftwidth=4
