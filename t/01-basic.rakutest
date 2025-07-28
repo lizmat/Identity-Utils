@@ -3,16 +3,16 @@ use Identity::Utils;
 
 my constant $dependency = "String::Utils:ver<0.0.35+>:auth<zef:lizmat>";
 
-plan 172;
+plan 173;
 
 # Check all of the default exports
 isa-ok OUTER::MY::{"&$_"}, Sub, "&$_ was exported" for <
   api auth build bytecode bytecode-io compunit dependencies-from-depends
-  dependencies-from-identity dependency-specification ecosystem from
-  is-short-name is-pinned latest-successors meta nick raku-land-url
-  rea-dist rea-dist-url rea-meta rea-meta-url sanitize short-name
-  source source-io ver version without-api without-auth without-from
-  without-ver
+  dependencies-from-identity dependency-specification distribution-name
+  ecosystem from is-short-name is-pinned latest-successors meta nick
+  raku-land-url rea-dist rea-dist-url rea-meta rea-meta-url sanitize
+  short-name source source-io ver version without-api without-auth
+  without-from without-ver
 >;
 
 # Check String::Utils subs *not* being exported

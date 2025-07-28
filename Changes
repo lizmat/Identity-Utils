@@ -1,6 +1,8 @@
 Revision history for Identity-Utils
 
 {{$NEXT}}
+
+0.0.25  2025-07-28T22:29:44+02:00
     - Add "distribution-name"
 
 0.0.24  2025-07-25T12:29:01+02:00
