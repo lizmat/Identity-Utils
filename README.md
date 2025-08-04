@@ -238,17 +238,27 @@ A boolean named argument `need` can be specified to indicate that a bytecode fil
 
 Returns `Nil` if the given identity could not be found.
 
-dependencies-from-depends
--------------------------
+dependencies-from-meta
+----------------------
 
 ```raku
 my %meta := from-json "META6.json".IO.slurp;
-with %meta<depends> -> $depends {
-    .say for dependencies-from-depends($depends);
-}
+
+# runtime dependencies
+.say for dependencies-from-meta(%meta);
+
+# build-dependencies
+.say for dependencies-from-meta(%meta, :stage<build>);
+
+# test-dependencies
+.say for dependencies-from-meta(%meta, :stage<test>);
 ```
 
-Returns an iterable that produces all of the dependencies of the given "depends" value, as usually found in the META6.json file of a distribution. Although this is generally just a list of strings for most distributions, it **can** contain more structured information (which is also handled by this logic).
+Returns an iterable that produces all of the dependencies found in given hash, usually produced from the META6.json file of a distribution.
+
+Takes an optional `:stage` named argument, which defaults to "runtime". Other possible values are "build" and "test".
+
+Returns `Empty` if no dependencies could be found for (implicitely) given stage.
 
 dependencies-from-identity
 --------------------------

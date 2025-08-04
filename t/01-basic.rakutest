@@ -3,16 +3,16 @@ use Identity::Utils;
 
 my constant $dependency = "String::Utils:ver<0.0.35+>:auth<zef:lizmat>";
 
-plan 173;
+plan 177;
 
 # Check all of the default exports
 isa-ok OUTER::MY::{"&$_"}, Sub, "&$_ was exported" for <
-  api auth build bytecode bytecode-io compunit dependencies-from-depends
-  dependencies-from-identity dependency-specification distribution-name
-  ecosystem from is-short-name is-pinned latest-successors meta nick
-  raku-land-url rea-dist rea-dist-url rea-meta rea-meta-url sanitize
-  short-name source source-io ver version without-api without-auth
-  without-from without-ver
+  api auth build bytecode bytecode-io compunit dependencies-from-identity
+  dependencies-from-meta dependency-specification distribution-name
+  ecosystem from is-pinned is-short-name latest-successors meta nick
+  raku-land-url rea-dist rea-dist-url rea-index rea-index-url rea-meta
+  rea-meta-url sanitize short-name source source-io ver version without-api
+  without-auth without-from without-ver zef-index zef-index-url
 >;
 
 # Check String::Utils subs *not* being exported
@@ -126,34 +126,43 @@ for $dir, $*REPO -> $repo {
 my %meta = meta($class, $dir);
 %meta<ver version>:delete;  # too finicky
 is-deeply %meta, %(
- api          => "",
- auth         => "zef:lizmat",
- authors      => ["Elizabeth Mattijsen"],
+ api           => "",
+ auth          => "zef:lizmat",
+ authors       => ["Elizabeth Mattijsen"],
  build-depends => [],
- depends      => [$dependency],
- description  => "Provide utility functions related to distribution identities",
- files        => %(),
- license      => "Artistic-2.0",
- name         => "Identity::Utils",
- perl         => "6.d",
- provides     => %("Identity::Utils" => "lib/Identity/Utils.rakumod"),
- resources    => [],
- source-url   => "https://github.com/lizmat/Identity-Utils.git",
- tags         => [<DISTRIBUTION META IDENTITY ECOSYSTEM>],
- test-depends => [],
+ depends => { runtime => { requires => [$dependency] } },
+ description   => "Provide utility functions related to distribution identities",
+ files         => %(),
+ license       => "Artistic-2.0",
+ name          => "Identity::Utils",
+ perl          => "6.d",
+ raku          => "6.d",
+ production    => True,
+ provides      => %("Identity::Utils" => "lib/Identity/Utils.rakumod"),
+ resources     => [],
+ source-url    => "https://github.com/lizmat/Identity-Utils.git",
+ support => {
+   bugtracker => "https://github.com/lizmat/Identity-Utils/issues",
+   email      => "liz@raku.rocks",
+   source     => "https://github.com/lizmat/Identity-Utils.git"
+ },
+ tags          => [<DISTRIBUTION META IDENTITY ECOSYSTEM>],
+ test-depends  => [],
 ), "is meta ok";
 
-is-deeply dependencies-from-depends(%meta<depends>),
+is-deeply dependencies-from-meta(%meta),
   ($dependency,),
   'can we get dependencies from depends info';
 
 is-deeply
-  dependencies-from-depends({ runtime => { requires => [$dependency] } }),
+  dependencies-from-meta(
+    { depends => { runtime => { requires => [$dependency] } } }
+  ),
   ($dependency,),
   'can we get dependencies from Associative depends info';
 
 is-deeply
-  dependencies-from-depends($dependency),
+  dependencies-from-meta({ depends => $dependency }),
   ($dependency,),
   'can we get dependencies from Str depends info';
 

@@ -1,12 +1,12 @@
 use Test;
 
 my constant @subs = <
-  api auth build bytecode bytecode-io compunit dependency-specification
+  api auth build bytecode bytecode-io compunit dependencies-from-identity
+  dependencies-from-meta dependency-specification distribution-name
   ecosystem from is-pinned is-short-name latest-successors meta nick
   raku-land-url rea-dist rea-dist-url rea-index rea-index-url rea-meta
-  rea-meta-url sanitize short-name source source-io ver version
-  without-api without-auth without-from without-ver zef-index
-  zef-index-url
+  rea-meta-url sanitize short-name source source-io ver version without-api
+  without-auth without-from without-ver zef-index zef-index-url
 >;
 
 plan @subs + 2;

@@ -1,6 +1,10 @@
 Revision history for Identity-Utils
 
 {{$NEXT}}
+    - Change "dependencies-from-depends" to "dependencies-from-meta"
+      as the interface to "from-depends" was too limiting in the light
+      of a meta hash being allowed to contain several differet ways of
+      expression the same build / test / runtime dependencies
 
 0.0.25  2025-07-28T22:29:44+02:00
     - Add "distribution-name"

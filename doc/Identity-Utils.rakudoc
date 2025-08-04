@@ -242,20 +242,35 @@ yet.
 
 Returns C<Nil> if the given identity could not be found.
 
-=head2 dependencies-from-depends
+=head2 dependencies-from-meta
 
 =begin code :lang<raku>
 my %meta := from-json "META6.json".IO.slurp;
-with %meta<depends> -> $depends {
-    .say for dependencies-from-depends($depends);
-}
+
+# runtime dependencies
+.say for dependencies-from-meta(%meta);
+
+# build-dependencies
+.say for dependencies-from-meta(%meta, :stage<build>);
+
+# test-dependencies
+.say for dependencies-from-meta(%meta, :stage<test>);
+
+# test-dependencies
+.say for dependencies-from-meta(%meta, :stage<all>);
 =end code
 
-Returns an iterable that produces all of the dependencies of the
-given "depends" value, as usually found in the META6.json file
-of a distribution.  Although this is generally just a list of
-strings for most distributions, it B<can> contain more structured
-information (which is also handled by this logic).
+Returns an iterable that produces all of the dependencies found in
+given hash, usually produced from the META6.json file of a
+distribution.
+
+Takes an optional C<:stage> named argument, which defaults to
+"runtime".  Other possible values are "build", "test" and "all".
+If "all" is specified, the unique dependencies of "runtime", "build"
+and "test" will be returned.
+
+Returns C<Empty> if no dependencies could be found for (implicitely)
+given stage.
 
 =head2 dependencies-from-identity
 

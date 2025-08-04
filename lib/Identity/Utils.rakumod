@@ -127,31 +127,68 @@ my sub compunit(str $identity, $REPO? is copy, :$need) {
     }
 }
 
-#- dependencies-from-depends ---------------------------------------------------
-my sub dependencies-from-depends($depends) {
-    if $depends ~~ Positional {
-        $depends.grep({ $_ ~~ Str })
-    }
-    elsif $depends ~~ Associative {
-        if $depends<runtime><requires> -> $requires {
-            $requires.map: {
-                $_ ~~ Associative
-                  ?? build .<name> // '',
-                       :ver(.<ver>), :auth(.<auth>),
-                       :api(.<api>), :from(.<from>)
-                  !! $_
-            } if $requires ~~ Positional
+#- dependencies-from-meta ------------------------------------------------------
+my sub dependencies-from-meta(
+       %meta,
+  str :$stage = 'runtime',
+  str :$type  = 'requires',
+      :$all
+) {
+
+    # Process the contents of %meta<depends> which may either be a hash
+    # with full capabilities for specification, or just a list or string
+    # for runtime requirements
+    my sub maybe-hash() {
+        my $depends := %meta<depends>;
+
+        if $depends ~~ Associative {
+            if $depends{$stage}{$type} -> $selected {
+                $selected.map: {
+                    $_ ~~ Associative
+                      ?? build .<name> // '',
+                           :ver(.<ver>), :auth(.<auth>),
+                           :api(.<api>), :from(.<from>)
+                      !! $_
+                } if $selected ~~ Positional
+            }
+        }
+        elsif $stage eq 'runtime' && $type eq 'requires' {
+            if $depends ~~ Positional {
+                $depends.grep({ $_ ~~ Str })
+            }
+            elsif $depends ~~ Str {  # UNCOVERABLE
+                ($depends,)
+            }
         }
     }
-    elsif $depends ~~ Str {  # UNCOVERABLE
-        ($depends,)
+
+    if $stage eq 'all' {
+        <build test runtime>.map(-> $stage {
+            dependencies-from-meta(%meta, :$stage).Slip
+        }).unique
+    }
+    elsif $stage eq 'runtime' {
+        maybe-hash
+    }
+    elsif $stage eq 'build' | 'test' {
+        with %meta{$stage ~ "_depends"} -> $depends {
+            $depends.grep(* ~~ Str)
+        }
+        else {
+            maybe-hash
+        }
     }
 }
 
 #- dependencies-from-identity --------------------------------------------------
-my sub dependencies-from-identity(str $identity, $REPO?) {
+my sub dependencies-from-identity(
+  str  $identity,
+       $REPO?,
+  str :$stage = 'runtime',
+  str :$type  = 'requires',
+) {
     with meta($identity, $REPO) -> %meta {
-        dependencies-from-depends($_) with %meta.<depends>
+        dependencies-from-meta(%meta, :$stage, :$type)
     }
 }
 
@@ -438,6 +475,6 @@ my sub EXPORT(*@names) {
 
 #- hack ------------------------------------------------------------------------
 # To allow version / auth / api fetching
-module Identity::Utils:ver<0.0.25>:auth<zef:lizmat> { }
+module Identity::Utils:ver<0.0.26>:auth<zef:lizmat> { }
 
 # vim: expandtab shiftwidth=4

@@ -1,0 +1,73 @@
+use Test;
+use Identity::Utils <dependencies-from-meta>;
+
+plan 31;
+
+my @dependencies is List = <Foo Bar>;
+my %meta = depends => { runtime => { requires => @dependencies } }
+
+sub test-runtime() is test-assertion {
+    for \(), \(:stage<runtime>), \(:stage<all>) -> $capture {
+        is-deeply dependencies-from-meta(%meta, |$capture),
+          @dependencies,
+          "did a call with $capture.raku.substr(2,*-1) work";
+    }
+    for <build test> -> $stage {
+        is-deeply dependencies-from-meta(%meta, :$stage),
+          Empty,
+          "did a simple call work with stage $stage return Empty";
+    }
+}
+test-runtime;
+
+%meta<depends><build> = %meta<depends><runtime>:delete;
+
+sub test-build() is test-assertion {
+    for \(:stage<build>), \(:stage<all>) -> $capture {
+        is-deeply dependencies-from-meta(%meta, |$capture),
+          @dependencies,
+          "did a call with $capture.raku.substr(2,*-1) work";
+    }
+    for \(), \(:stage<runtime>), \(:stage<test>) -> $capture {
+        is-deeply dependencies-from-meta(%meta, |$capture),
+          Empty,
+          "did a call with $capture.raku.substr(2,*-1) return Empty";
+    }
+}
+test-build;
+
+%meta<depends><test> = %meta<depends><build>:delete;
+
+sub test-test() is test-assertion {
+    for \(:stage<test>), \(:stage<all>) -> $capture {
+        is-deeply dependencies-from-meta(%meta, |$capture),
+          @dependencies,
+          "did a call with $capture.raku.substr(2,*-1) work";
+    }
+    for \(), \(:stage<runtime>), \(:stage<build>) -> $capture {
+        is-deeply dependencies-from-meta(%meta, |$capture),
+          Empty,
+          "did a call with $capture.raku.substr(2,*-1) return Empty";
+    }
+}
+test-test;
+
+%meta = depends => @dependencies;
+test-runtime;
+
+%meta = build_depends => @dependencies;
+test-build;
+
+%meta = test_depends => @dependencies;
+test-test;
+
+%meta = depends => {
+    build   => { requires => @dependencies },
+    test    => { requires => @dependencies },
+    runtime => { requires => @dependencies },
+}
+is-deeply dependencies-from-meta(%meta, :all).sort,
+  @dependencies.sort,
+  "did a call with :all produce unique dependencies";
+
+# vim: expandtab shiftwidth=4
