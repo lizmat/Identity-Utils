@@ -1,6 +1,8 @@
 Revision history for Identity-Utils
 
 {{$NEXT}}
+
+0.0.26  2025-08-04T20:10:21+02:00
     - Change "dependencies-from-depends" to "dependencies-from-meta"
       as the interface to "from-depends" was too limiting in the light
       of a meta hash being allowed to contain several differet ways of

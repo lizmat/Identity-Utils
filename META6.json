@@ -16,11 +16,11 @@
   "license": "Artistic-2.0",
   "name": "Identity::Utils",
   "perl": "6.d",
-  "raku": "6.d",
   "production": true,
   "provides": {
     "Identity::Utils": "lib/Identity/Utils.rakumod"
   },
+  "raku": "6.d",
   "resources": [
   ],
   "source-url": "https://github.com/lizmat/Identity-Utils.git",

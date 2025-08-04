@@ -252,11 +252,14 @@ my %meta := from-json "META6.json".IO.slurp;
 
 # test-dependencies
 .say for dependencies-from-meta(%meta, :stage<test>);
+
+# test-dependencies
+.say for dependencies-from-meta(%meta, :stage<all>);
 ```
 
 Returns an iterable that produces all of the dependencies found in given hash, usually produced from the META6.json file of a distribution.
 
-Takes an optional `:stage` named argument, which defaults to "runtime". Other possible values are "build" and "test".
+Takes an optional `:stage` named argument, which defaults to "runtime". Other possible values are "build", "test" and "all". If "all" is specified, the unique dependencies of "runtime", "build" and "test" will be returned.
 
 Returns `Empty` if no dependencies could be found for (implicitely) given stage.
 
