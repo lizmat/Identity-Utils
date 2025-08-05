@@ -1,6 +1,8 @@
 Revision history for Identity-Utils
 
 {{$NEXT}}
+
+0.0.28  2025-08-05T22:24:59+02:00
     - Add "issue-tracker-url" and "source-distribution-url"
 
 0.0.27  2025-08-05T15:16:02+02:00
