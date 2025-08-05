@@ -2,6 +2,10 @@ Revision history for Identity-Utils
 
 {{$NEXT}}
 
+0.0.27  2025-08-05T15:16:02+02:00
+    - Add support for "author" stage to "dependencies-from-meta"
+    - Fix incorrect references to "build_depends" and "test_depends"
+
 0.0.26  2025-08-04T20:10:21+02:00
     - Change "dependencies-from-depends" to "dependencies-from-meta"
       as the interface to "from-depends" was too limiting in the light

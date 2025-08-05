@@ -163,15 +163,15 @@ my sub dependencies-from-meta(
     }
 
     if $stage eq 'all' {
-        <build test runtime>.map(-> $stage {
+        <author build test runtime>.map(-> $stage {
             dependencies-from-meta(%meta, :$stage).Slip
         }).unique
     }
     elsif $stage eq 'runtime' {
         maybe-hash
     }
-    elsif $stage eq 'build' | 'test' {
-        with %meta{$stage ~ "_depends"} -> $depends {
+    elsif $stage eq 'author' | 'build' | 'test' {
+        with %meta{$stage ~ "-depends"} -> $depends {
             $depends.grep(* ~~ Str)
         }
         else {
@@ -475,6 +475,6 @@ my sub EXPORT(*@names) {
 
 #- hack ------------------------------------------------------------------------
 # To allow version / auth / api fetching
-module Identity::Utils:ver<0.0.26>:auth<zef:lizmat> { }
+module Identity::Utils:ver<0.0.27>:auth<zef:lizmat> { }
 
 # vim: expandtab shiftwidth=4

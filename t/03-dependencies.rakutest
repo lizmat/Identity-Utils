@@ -55,13 +55,14 @@ test-test;
 %meta = depends => @dependencies;
 test-runtime;
 
-%meta = build_depends => @dependencies;
+%meta = build-depends => @dependencies;
 test-build;
 
-%meta = test_depends => @dependencies;
+%meta = test-depends => @dependencies;
 test-test;
 
 %meta = depends => {
+    author  => { requires => @dependencies },
     build   => { requires => @dependencies },
     test    => { requires => @dependencies },
     runtime => { requires => @dependencies },
