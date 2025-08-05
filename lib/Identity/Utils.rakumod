@@ -234,6 +234,15 @@ my sub is-short-name(str $identity) {
     short-name($identity) eq $identity
 }
 
+#- issue-tracker-url -----------------------------------------------------------
+my sub issue-tracker-url(str $url) {
+    $url.starts-with("https://github.com/")
+      ?? "$url.subst('.git')/issues"
+      !! $url.starts-with("https://gitlab.com")
+        ?? "$url.subst('.git')/-/issues"
+        !! Nil
+}
+
 #- latest-successors -----------------------------------------------------------
 my sub latest-successors(@identities) {
     my %by-short-name;
@@ -384,6 +393,13 @@ my sub source(str $identity, $REPO?) {
     else {
         Nil
     }
+}
+
+#- source-distribution-url -----------------------------------------------------
+my sub source-distribution-url(str $url, Str() $version) {
+    $url.starts-with("https://github.com/")
+      ?? "$url.subst('*.git')/archive/refs/tags/$version.zip"
+      !! Nil
 }
 
 #- source-io -------------------------------------------------------------------

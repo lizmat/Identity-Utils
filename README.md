@@ -348,6 +348,16 @@ say is-short-name("Foo::Bar");  # True
 
 Returns a boolean indicating whether the given identity consists of just a `short-name`.
 
+issue-tracker-url
+-----------------
+
+```raku
+say issue-tracker-url("https://gitlab.com/raku-land/raku-land.git");
+# https://gitlab.com/raku-land/raku-land/-/issues
+```
+
+Convert the URL of a distribution into the URL of the page where issues can be made / inspected. Currently supported are URLs on Github and Gitlab. `Nil` will be returned if the URL is not recognized.
+
 latest-successors
 -----------------
 
@@ -619,6 +629,16 @@ It is also possible to override the repository (chain) by specifying a second ar
   * `CompUnit::Repository` - the actual repo to use
 
 Returns `Nil` if the given identity could not be found, or there is no source-file for the short-name of the given identity.
+
+source-distribution-url
+-----------------------
+
+```raku
+say source-distribution("https://github.com/janedoe/Foo.git", v1.2.3);
+# 'https://github.com/janedoe/Foo/archive/refs/tags/1.2.3.zip'
+```
+
+Convert the URL of a distribution into the URL to download the artifact of the given version from. Currently only Github URLs are supported. `Nil` will be returned if the URL is not recognized.
 
 source-io
 ---------

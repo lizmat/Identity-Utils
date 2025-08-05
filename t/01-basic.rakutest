@@ -3,16 +3,17 @@ use Identity::Utils;
 
 my constant $dependency = "String::Utils:ver<0.0.35+>:auth<zef:lizmat>";
 
-plan 177;
+plan 181;
 
 # Check all of the default exports
 isa-ok OUTER::MY::{"&$_"}, Sub, "&$_ was exported" for <
   api auth build bytecode bytecode-io compunit dependencies-from-identity
   dependencies-from-meta dependency-specification distribution-name
-  ecosystem from is-pinned is-short-name latest-successors meta nick
-  raku-land-url rea-dist rea-dist-url rea-index rea-index-url rea-meta
-  rea-meta-url sanitize short-name source source-io ver version without-api
-  without-auth without-from without-ver zef-index zef-index-url
+  ecosystem from is-pinned is-short-name issue-tracker-url latest-successors
+  meta nick raku-land-url rea-dist rea-dist-url rea-index rea-index-url
+  rea-meta rea-meta-url sanitize short-name source source-distribution-url
+  source-io ver version without-api without-auth without-from without-ver
+  zef-index zef-index-url
 >;
 
 # Check String::Utils subs *not* being exported
@@ -214,5 +215,13 @@ is rea-meta-url($identity),
 is distribution-name("SBOM::CycloneDX:ver<0.0.9>:auth<zef:lizmat>"),
   'SBOM-CycloneDX-0.0.9.tar.gz',
   'is the distribution name correct';
+
+is source-distribution-url("https://github.com/janedoe/Foo-Bar", v1.2.3),
+  'https://github.com/janedoe/Foo-Bar/archive/refs/tags/1.2.3.zip',
+  'is the source distribution URL correct';
+
+is issue-tracker-url("https://github.com/janedoe/Foo-Bar"),
+  'https://github.com/janedoe/Foo-Bar/issues',
+  'is the issue tracker URL correct';
 
 # vim: expandtab shiftwidth=4

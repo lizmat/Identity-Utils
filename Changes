@@ -1,6 +1,7 @@
 Revision history for Identity-Utils
 
 {{$NEXT}}
+    - Add "issue-tracker-url" and "source-distribution-url"
 
 0.0.27  2025-08-05T15:16:02+02:00
     - Add support for "author" stage to "dependencies-from-meta"
