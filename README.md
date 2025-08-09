@@ -238,6 +238,27 @@ A boolean named argument `need` can be specified to indicate that a bytecode fil
 
 Returns `Nil` if the given identity could not be found.
 
+dependencies-from-identity
+--------------------------
+
+```raku
+.say for dependencies-from-identity($identity);       # default: $*REPO
+
+.say for dependencies-from-identity($identity, ".");  # as if with -I.
+```
+
+Returns an iterable that produces all of the dependencies of the given identity.
+
+It is also possible to override the repository (chain) by specifying a second argument, this can be an object of type:
+
+  * `Str` - indicate a path for a ::FileSystem repo, just as with -I.
+
+  * `IO::Path` - indicate a path for a ::FileSystem repo
+
+  * `CompUnit::Repository` - the actual repo to use
+
+Returns `Empty` if either the given identity could not be found, or there are no dependencies.
+
 dependencies-from-meta
 ----------------------
 
@@ -265,27 +286,6 @@ Returns an iterable that produces all of the dependencies found in given hash, u
 Takes an optional `:stage` named argument, which defaults to "runtime". Other possible values are "author", "build", "test" and "all". If "all" is specified, the unique dependencies of "author", "build", "test" and "runtime" will be returned.
 
 Returns `Empty` if no dependencies could be found for (implicitely) given stage.
-
-dependencies-from-identity
---------------------------
-
-```raku
-.say for dependencies-from-identity($identity);       # default: $*REPO
-
-.say for dependencies-from-identity($identity, ".");  # as if with -I.
-```
-
-Returns an iterable that produces all of the dependencies of the given identity.
-
-It is also possible to override the repository (chain) by specifying a second argument, this can be an object of type:
-
-  * `Str` - indicate a path for a ::FileSystem repo, just as with -I.
-
-  * `IO::Path` - indicate a path for a ::FileSystem repo
-
-  * `CompUnit::Repository` - the actual repo to use
-
-Returns `Empty` if either the given identity could not be found, or there are no dependencies.
 
 dependency-specification
 ------------------------

@@ -242,6 +242,26 @@ yet.
 
 Returns C<Nil> if the given identity could not be found.
 
+=head2 dependencies-from-identity
+
+=begin code :lang<raku>
+.say for dependencies-from-identity($identity);       # default: $*REPO
+
+.say for dependencies-from-identity($identity, ".");  # as if with -I.
+=end code
+
+Returns an iterable that produces all of the dependencies of the
+given identity.
+
+It is also possible to override the repository (chain) by specifying
+a second argument, this can be an object of type:
+=item C<Str> - indicate a path for a ::FileSystem repo, just as with -I.
+=item C<IO::Path> - indicate a path for a ::FileSystem repo
+=item C<CompUnit::Repository> - the actual repo to use
+
+Returns C<Empty> if either the given identity could not be found, or
+there are no dependencies.
+
 =head2 dependencies-from-meta
 
 =begin code :lang<raku>
@@ -274,26 +294,6 @@ Takes an optional C<:stage> named argument, which defaults to
 
 Returns C<Empty> if no dependencies could be found for (implicitely)
 given stage.
-
-=head2 dependencies-from-identity
-
-=begin code :lang<raku>
-.say for dependencies-from-identity($identity);       # default: $*REPO
-
-.say for dependencies-from-identity($identity, ".");  # as if with -I.
-=end code
-
-Returns an iterable that produces all of the dependencies of the
-given identity.
-
-It is also possible to override the repository (chain) by specifying
-a second argument, this can be an object of type:
-=item C<Str> - indicate a path for a ::FileSystem repo, just as with -I.
-=item C<IO::Path> - indicate a path for a ::FileSystem repo
-=item C<CompUnit::Repository> - the actual repo to use
-
-Returns C<Empty> if either the given identity could not be found, or
-there are no dependencies.
 
 =head2 dependency-specification
 
