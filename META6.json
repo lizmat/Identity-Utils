@@ -23,11 +23,11 @@
   "raku": "6.d",
   "resources": [
   ],
-  "source-url": "https://github.com/lizmat/Identity-Utils.git",
+  "source-url": "https://codeberg.org/lizmat/Identity-Utils.git",
   "support": {
-    "bugtracker": "https://github.com/lizmat/Identity-Utils/issues",
+    "bugtracker": "https://codeberg.org/lizmat/Identity-Utils/issues",
     "email": "liz@raku.rocks",
-    "source": "https://github.com/lizmat/Identity-Utils.git"
+    "source": "https://codeberg.org/lizmat/Identity-Utils.git"
   },
   "tags": [
     "DISTRIBUTION",
@@ -37,5 +37,5 @@
   ],
   "test-depends": [
   ],
-  "version": "0.0.28"
+  "version": "0.0.29"
 }

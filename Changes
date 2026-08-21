@@ -1,6 +1,8 @@
 Revision history for Identity-Utils
 
 {{$NEXT}}
+
+0.0.29  2026-08-21T11:24:33+02:00
     - Up dependency on String::Utils, because we can
     - Fix coverage testing under RakuAST
     - Update copyright year

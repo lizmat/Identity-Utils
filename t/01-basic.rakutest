@@ -141,11 +141,11 @@ is-deeply %meta, %(
  production    => True,
  provides      => %("Identity::Utils" => "lib/Identity/Utils.rakumod"),
  resources     => [],
- source-url    => "https://github.com/lizmat/Identity-Utils.git",
+ source-url    => "https://codeberg.org/lizmat/Identity-Utils.git",
  support => {
-   bugtracker => "https://github.com/lizmat/Identity-Utils/issues",
+   bugtracker => "https://codeberg.org/lizmat/Identity-Utils/issues",
    email      => "liz@raku.rocks",
-   source     => "https://github.com/lizmat/Identity-Utils.git"
+   source     => "https://codeberg.org/lizmat/Identity-Utils.git"
  },
  tags          => [<DISTRIBUTION META IDENTITY ECOSYSTEM>],
  test-depends  => [],
