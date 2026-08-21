@@ -1,4 +1,4 @@
-use String::Utils:ver<0.0.35+>:auth<zef:lizmat>
+use String::Utils:ver<0.0.40+>:auth<zef:lizmat>
   <after before between between-included text-from-url>;  # UNCOVERABLE
 
 #- helper subs -----------------------------------------------------------------
@@ -84,7 +84,7 @@ my sub bytecode-io(str $identity, $REPO?) {
             $io := $io.add(".precomp");
         }
         else {
-            return Nil;
+            return Nil;  # UNCOVERABLE
         }
 
         my $repo-id := .repo-id;
@@ -108,7 +108,7 @@ my sub compunit(str $identity, $REPO? is copy, :$need) {
             # already ok
         }
         else {
-            return Nil;
+            return Nil;  # UNCOVERABLE
         }
     }
     else {
@@ -167,7 +167,7 @@ my sub dependencies-from-meta(
             dependencies-from-meta(%meta, :$stage).Slip
         }).unique
     }
-    elsif $stage eq 'runtime' {
+    elsif $stage eq 'runtime' {  # UNCOVERABLE
         maybe-hash
     }
     elsif $stage eq 'author' | 'build' | 'test' {
@@ -188,7 +188,7 @@ my sub dependencies-from-identity(
   str :$type  = 'requires',
 ) {
     with meta($identity, $REPO) -> %meta {
-        dependencies-from-meta(%meta, :$stage, :$type)
+        dependencies-from-meta(%meta, :$stage, :$type)  # UNCOVERABLE
     }
 }
 
@@ -209,7 +209,7 @@ my sub distribution-name(str $identity, str $extension = 'tar.gz') {
 #- ecosystem -------------------------------------------------------------------
 my sub ecosystem(str $identity) {
     with auth($identity) -> $auth {
-        before $auth, ':'
+        before $auth, ':'  # UNCOVERABLE
     }
     else {
         Nil
@@ -279,7 +279,7 @@ my sub meta(str $identity, $REPO?) {
 #- nick ------------------------------------------------------------------------
 my sub nick(str $identity) {
     with auth($identity) -> $auth {
-        after $auth, ':'
+        after $auth, ':'  # UNCOVERABLE
     }
     else {
         Nil

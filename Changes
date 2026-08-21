@@ -1,6 +1,9 @@
 Revision history for Identity-Utils
 
 {{$NEXT}}
+    - Up dependency on String::Utils, because we can
+    - Fix coverage testing under RakuAST
+    - Update copyright year
 
 0.0.28  2025-08-05T22:24:59+02:00
     - Add "issue-tracker-url" and "source-distribution-url"
